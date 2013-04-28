@@ -1,6 +1,9 @@
 package com.dianping.wizard.admin.resource;
 
 import com.dianping.wizard.admin.wrapper.RenderingRequest;
+import com.dianping.wizard.admin.wrapper.SiteRenderingRequest;
+import com.dianping.wizard.site.SiteRenderer;
+import com.dianping.wizard.site.SiteRendererImpl;
 import com.dianping.wizard.widget.Widget;
 import com.dianping.wizard.widget.WidgetRenderer;
 import com.dianping.wizard.widget.WidgetRendererFactory;
@@ -19,25 +22,25 @@ import javax.ws.rs.core.MediaType;
  * To change this template use File | Settings | File Templates.
  */
 
-@Path("/widget-output")
-public class WidgetDisplay {
+@Path("/site-output")
+public class SiteDisplay {
 
-    private WidgetRenderer renderer= WidgetRendererFactory.getRenderer("default");
+    private SiteRenderer renderer= new SiteRendererImpl();
 
     @POST
     @Path("/display")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public String renderWidgetDisplay(RenderingRequest request){
-        return renderer.renderWidget(request.widget, Widget.ModeType.Display.value,request.param);
+    public String renderSiteDisplay(SiteRenderingRequest request){
+        return renderer.renderSite(request.site, Widget.ModeType.Display.value, request.param);
     }
 
     @POST
     @Path("/config")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public String renderWidgetConfig(RenderingRequest request){
-        return renderer.renderWidget(request.widget, Widget.ModeType.Config.value,request.param);
+    public String renderSiteConfig(SiteRenderingRequest request){
+        return renderer.renderSite(request.site, Widget.ModeType.Config.value, request.param);
     }
 
 }

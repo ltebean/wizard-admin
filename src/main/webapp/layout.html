@@ -1,0 +1,70 @@
+<!doctype html>
+<html ng-app>
+<head>
+    <title>Wizard</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="/public/js/angular.js"></script>
+    <script type="text/javascript" src="/public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
+    <style>
+        .container {
+            width: 1024px;
+            margin-bottom: 30px;
+        }
+        textarea {
+            width:400px;
+            height:150px;
+        }
+    </style>
+    <script type="text/javascript">
+        var config={};
+        function Controller ($scope,$http) {
+            function getURLParameter(name) {
+                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+            }
+            var layoutName=getURLParameter("name");
+            var loadLayout=function(){
+                $http.get("/api/layout/"+layoutName)
+                        .success(function(data) {
+                            $scope.layout=data;
+                            $scope.configString=JSON.stringify(data.config);
+
+                        }).error(function(data) {
+                            alert("server error");
+                        });
+            }
+
+            loadLayout();
+
+            $scope.updateLayout=function(){
+                $scope.layout.config=JSON.parse($scope.configString);
+                $http.post("/api/layout/",$scope.layout)
+                        .success(function(data) {
+                        }).error(function(data) {
+                            alert("server error");
+                        });
+            }
+
+
+        }
+    </script>
+</head>
+<body ng-controller="Controller">
+<div id="wrap">
+    <div class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-conntent">
+                <a class="brand" href="#">Wizard</a>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="control-group">
+            <h4>Config layout:</h4>
+            <textarea type="text"  ng-model="configString" placeholder=""></textarea>
+            <button type="submit" ng-click="updateLayout()" class="btn">Submit</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

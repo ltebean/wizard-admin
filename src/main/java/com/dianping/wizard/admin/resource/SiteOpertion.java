@@ -1,8 +1,9 @@
 package com.dianping.wizard.admin.resource;
 
+import com.dianping.wizard.site.Site;
+import com.dianping.wizard.site.repo.SiteRepo;
+import com.dianping.wizard.site.repo.SiteRepoFactory;
 import com.dianping.wizard.widget.Widget;
-import com.dianping.wizard.widget.repo.WidgetRepo;
-import com.dianping.wizard.widget.repo.WidgetRepoFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -15,25 +16,25 @@ import javax.ws.rs.core.MediaType;
  * To change this template use File | Settings | File Templates.
  */
 
-@Path("/widget")
-public class WidgetOpertion {
+@Path("/site")
+public class SiteOpertion {
 
-    private WidgetRepo widgetRepo= WidgetRepoFactory.getRepo("default");
+    private SiteRepo siteRepo= SiteRepoFactory.getRepo("default");
 
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Widget loadWidget(@PathParam("name") String name){
+    public Widget loadSite(@PathParam("name") String name){
 
-        return widgetRepo.loadWidgetByName(name);
+        return siteRepo.loadSiteByName(name);
     }
 
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public void saveWidget(Widget widget){
+    public void saveSite(Site site){
 
-         widgetRepo.saveWidget(widget);
+        siteRepo.saveSite(site);
     }
 
 

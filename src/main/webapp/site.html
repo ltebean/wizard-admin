@@ -19,40 +19,38 @@
     <script type="text/javascript">
         var config={};
         function Controller ($scope,$http) {
-
-            var loadWidget=function(){
-                $http.get("/api/widget/shopDisplay")
+            function getURLParameter(name) {
+                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+            }
+            var siteName=getURLParameter("name");
+            var loadSite=function(){
+                $http.get("/api/site/"+siteName)
                         .success(function(data) {
-                            $scope.widget=data;
-                            config=data.config;
+                            $scope.site=data;
                         }).error(function(data) {
                             alert("server error");
                         });
             }
 
-            loadWidget();
+            loadSite();
 
-            var updateWidget=function(){
-                $scope.widget.config=config;
-                $http.post("/api/widget/",$scope.widget)
+            var updateSite=function(){
+                $http.post("/api/site/",$scope.site)
                         .success(function(data) {
                         }).error(function(data) {
                             alert("server error");
                         });
             }
 
-            $scope.renderWidget=function(mode){
+            $scope.renderSite=function(mode){
                 var body={
                     param:JSON.parse($scope.paramString),
-                    widget:$scope.widget
+                    site:$scope.site
                 }
-                $http.post("/api/widget-output/"+mode,body)
+                $http.post("/api/site-output/"+mode,body)
                         .success(function(data) {
                             $scope[mode]=data;
-                            updateWidget();
-                            setTimeout(function(){
-                                eval($scope.widget.modes[mode].script);
-                            },500);
+                            updateSite();
 
                         }).error(function(data) {
                             alert("server error");
@@ -73,13 +71,17 @@
     <div class="container">
         <div class="control-group">
             <h4>Config Param:</h4>
-            <input type="text" id="shopId"  ng-model="paramString" placeholder="">
+            <input type="text"  ng-model="paramString" placeholder="">
+        </div>
+        <div class="control-group">
+            <h4>Config Rule:</h4>
+            <textarea type="text"  ng-model="site.rule" placeholder=""></textarea>
         </div>
     </div>
     <div class="container">
         <ul class="nav nav-tabs">
-            <li><a href="#display" data-toggle="tab" ng-click="renderWidget('display')">Display Mode</a></li>
-            <li><a href="#config" data-toggle="tab" ng-click="renderWidget('config')">Config Mode</a></li>
+            <li><a href="#display" data-toggle="tab" ng-click="renderSite('display')">Display Mode</a></li>
+            <li><a href="#config" data-toggle="tab" ng-click="renderSite('config')">Config Mode</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane active" ng-bind-html-unsafe="display" id="display">
@@ -96,11 +98,11 @@
                 <fieldset>
                     <legend>Display</legend>
                     <label>code</label>
-                    <textarea rows="5" ng-model="widget.modes.display.code"></textarea>
+                    <textarea rows="5" ng-model="site.modes.display.code"></textarea>
                     <label>template</label>
-                    <textarea ng-model="widget.modes.display.template" rows="5"></textarea>
+                    <textarea ng-model="site.modes.display.template" rows="5"></textarea>
                     <label>script</label>
-                    <textarea ng-model="widget.modes.display.script" rows="5"></textarea>
+                    <textarea ng-model="site.modes.display.script" rows="5"></textarea>
 
                 </fieldset>
             </form>
@@ -110,11 +112,11 @@
                 <fieldset>
                     <legend>Config</legend>
                     <label>code</label>
-                    <textarea rows="5" ng-model="widget.modes.config.code"></textarea>
+                    <textarea rows="5" ng-model="site.modes.config.code"></textarea>
                     <label>template</label>
-                    <textarea ng-model="widget.modes.config.template" rows="5"></textarea>
+                    <textarea ng-model="site.modes.config.template" rows="5"></textarea>
                     <label>script</label>
-                    <textarea ng-model="widget.modes.config.script" rows="5"></textarea>
+                    <textarea ng-model="site.modes.config.script" rows="5"></textarea>
                 </fieldset>
             </form>
         </div>
