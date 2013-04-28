@@ -1,7 +1,7 @@
 <!doctype html>
 <html ng-app>
 <head>
-    <title>Wizard</title>
+    <title>Wizard - Site Config</title>
     <link href="/public/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="/public/js/angular.js"></script>
     <script type="text/javascript" src="/public/js/jquery.min.js"></script>
@@ -43,6 +43,9 @@
             }
 
             $scope.renderSite=function(mode){
+                if($scope.paramString==undefined){
+                    $scope.paramString='{}';
+                }
                 var body={
                     param:JSON.parse($scope.paramString),
                     site:$scope.site
