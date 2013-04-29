@@ -1,8 +1,8 @@
 package com.dianping.wizard.admin.resource;
 
+import com.dianping.wizard.repo.GenericRepo;
+import com.dianping.wizard.repo.RepoFactory;
 import com.dianping.wizard.site.Site;
-import com.dianping.wizard.site.repo.SiteRepo;
-import com.dianping.wizard.site.repo.SiteRepoFactory;
 import com.dianping.wizard.widget.Widget;
 
 import javax.ws.rs.*;
@@ -19,14 +19,14 @@ import javax.ws.rs.core.MediaType;
 @Path("/site")
 public class SiteOpertion {
 
-    private SiteRepo siteRepo= SiteRepoFactory.getRepo("default");
+    private GenericRepo<Site> repo= RepoFactory.getRepo(Site.class);
 
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Widget loadSite(@PathParam("name") String name){
 
-        return siteRepo.loadSiteByName(name);
+        return repo.loadByName(name);
     }
 
     @POST
@@ -34,7 +34,7 @@ public class SiteOpertion {
     @Produces(MediaType.APPLICATION_JSON)
     public void saveSite(Site site){
 
-        siteRepo.saveSite(site);
+        repo.save(site);
     }
 
 

@@ -1,8 +1,9 @@
 package com.dianping.wizard.admin.resource;
 
+import com.dianping.wizard.repo.GenericRepo;
+import com.dianping.wizard.repo.RepoFactory;
+import com.dianping.wizard.site.Layout;
 import com.dianping.wizard.widget.Widget;
-import com.dianping.wizard.widget.repo.WidgetRepo;
-import com.dianping.wizard.widget.repo.WidgetRepoFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -18,14 +19,14 @@ import javax.ws.rs.core.MediaType;
 @Path("/widget")
 public class WidgetOpertion {
 
-    private WidgetRepo widgetRepo= WidgetRepoFactory.getRepo("default");
+    private GenericRepo<Widget> repo= RepoFactory.getRepo(Widget.class);
 
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Widget loadWidget(@PathParam("name") String name){
 
-        return widgetRepo.loadWidgetByName(name);
+        return repo.loadByName(name);
     }
 
     @POST
@@ -33,7 +34,7 @@ public class WidgetOpertion {
     @Produces(MediaType.APPLICATION_JSON)
     public void saveWidget(Widget widget){
 
-         widgetRepo.saveWidget(widget);
+         repo.save(widget);
     }
 
 

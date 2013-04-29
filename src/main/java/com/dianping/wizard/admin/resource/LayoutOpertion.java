@@ -1,9 +1,8 @@
 package com.dianping.wizard.admin.resource;
 
+import com.dianping.wizard.repo.GenericRepo;
+import com.dianping.wizard.repo.RepoFactory;
 import com.dianping.wizard.site.Layout;
-import com.dianping.wizard.site.Site;
-import com.dianping.wizard.site.repo.LayoutRepo;
-import com.dianping.wizard.site.repo.LayoutRepoFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -19,14 +18,14 @@ import javax.ws.rs.core.MediaType;
 @Path("/layout")
 public class LayoutOpertion {
 
-    private LayoutRepo repo= LayoutRepoFactory.getRepo("default");
+    private GenericRepo<Layout> repo= RepoFactory.getRepo(Layout.class);
 
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Layout loadLayout(@PathParam("name") String name){
 
-        return repo.loadLayoutByName(name);
+        return repo.loadByName(name);
     }
 
     @POST
@@ -34,7 +33,7 @@ public class LayoutOpertion {
     @Produces(MediaType.APPLICATION_JSON)
     public void saveLayout(Layout layout){
 
-        repo.saveLayout(layout);
+        repo.save(layout);
     }
 
 
