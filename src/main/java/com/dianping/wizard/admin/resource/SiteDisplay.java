@@ -1,12 +1,9 @@
 package com.dianping.wizard.admin.resource;
 
-import com.dianping.wizard.admin.wrapper.RenderingRequest;
 import com.dianping.wizard.admin.wrapper.SiteRenderingRequest;
 import com.dianping.wizard.site.SiteRenderer;
-import com.dianping.wizard.site.SiteRendererImpl;
+import com.dianping.wizard.site.SiteRendererFactory;
 import com.dianping.wizard.widget.Widget;
-import com.dianping.wizard.widget.WidgetRenderer;
-import com.dianping.wizard.widget.WidgetRendererFactory;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -25,7 +22,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/site-output")
 public class SiteDisplay {
 
-    private SiteRenderer renderer= new SiteRendererImpl();
+    private SiteRenderer renderer= SiteRendererFactory.getRenderer("default");
 
     @POST
     @Path("/display")
