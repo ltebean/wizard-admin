@@ -2,7 +2,6 @@ package com.dianping.wizard.admin.resource;
 
 import com.dianping.wizard.repo.GenericRepo;
 import com.dianping.wizard.repo.RepoFactory;
-import com.dianping.wizard.site.Layout;
 import com.dianping.wizard.widget.Widget;
 
 import javax.ws.rs.*;
@@ -25,8 +24,12 @@ public class WidgetOpertion {
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Widget loadWidget(@PathParam("name") String name){
-
-        return repo.loadByName(name);
+        Widget widget= repo.loadByName(name);
+        if(widget==null){
+            widget=new Widget();
+            widget.name=name;
+        }
+        return widget;
     }
 
     @POST

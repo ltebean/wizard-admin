@@ -24,9 +24,13 @@ public class SiteOpertion {
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Widget loadSite(@PathParam("name") String name){
-
-        return repo.loadByName(name);
+    public Site loadSite(@PathParam("name") String name){
+        Site site= repo.loadByName(name);
+        if(site==null){
+            site=new Site();
+            site.name=name;
+        }
+        return site;
     }
 
     @POST
