@@ -5,10 +5,7 @@ import com.dianping.wizard.widget.Widget;
 import com.dianping.wizard.widget.WidgetRenderer;
 import com.dianping.wizard.widget.WidgetRendererFactory;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -25,19 +22,12 @@ public class WidgetDisplay {
     private WidgetRenderer renderer= WidgetRendererFactory.getRenderer("default");
 
     @POST
-    @Path("/display")
+    @Path("/{mode}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public String renderWidgetDisplay(RenderingRequest request){
-        return renderer.renderWidget(request.widget, Widget.ModeType.Display.value,request.param);
+    public String renderWidget(@PathParam("mode") String mode,RenderingRequest request){
+        return renderer.renderWidget(request.widget, mode ,request.param);
     }
 
-    @POST
-    @Path("/config")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String renderWidgetConfig(RenderingRequest request){
-        return renderer.renderWidget(request.widget, Widget.ModeType.Config.value,request.param);
-    }
 
 }

@@ -3,6 +3,7 @@ package com.dianping.wizard.admin.resource;
 import com.dianping.wizard.repo.GenericRepo;
 import com.dianping.wizard.repo.RepoFactory;
 import com.dianping.wizard.widget.Widget;
+import org.json.simple.JSONObject;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
