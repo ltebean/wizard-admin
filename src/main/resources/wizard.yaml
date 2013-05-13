@@ -2,5 +2,11 @@ mongo:
     host: 127.0.0.1
     port: 27017
     db: test
+interceptors:
+    - com.dianping.wizard.widget.interceptor.MergeInterceptor
+    - com.dianping.wizard.widget.extension.ServiceInjectionInterceptor
+    - com.dianping.wizard.widget.extension.StaticModelInjectionInterceptor
+    - com.dianping.wizard.widget.interceptor.RenderLayoutInterceptor
+    - com.dianping.wizard.widget.interceptor.BusinessInterceptor
 freemarker:
     properties: freemarker.properties

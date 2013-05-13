@@ -24,8 +24,13 @@ public class LayoutOpertion {
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Layout loadLayout(@PathParam("name") String name){
-
-        return repo.loadByName(name);
+        Layout layout= repo.loadByName(name);
+        if (layout == null) {
+            layout=new Layout();
+            layout.name=name;
+            repo.save(layout);
+        }
+        return layout;
     }
 
     @POST

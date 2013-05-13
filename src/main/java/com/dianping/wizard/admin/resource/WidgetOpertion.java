@@ -28,6 +28,7 @@ public class WidgetOpertion {
         if(widget==null){
             widget=new Widget();
             widget.name=name;
+            repo.save(widget);
         }
         return widget;
     }
