@@ -3,13 +3,13 @@
 <head>
     <title>Wizard - Widget Config</title>
     <link href="/public/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/public/css/flat-ui.css" rel="stylesheet"/>
     <script src="/public/js/angular.js"></script>
     <script type="text/javascript" src="/public/js/jquery.min.js"></script>
     <script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
     <style>
         .container {
             width: 1024px;
-            margin-bottom: 30px;
         }
         textarea {
             width:400px;
@@ -69,10 +69,21 @@
 </head>
 <body ng-controller="Controller">
 <div id="wrap">
-    <div class="navbar">
+    <div class="navbar navbar-inverse">
         <div class="navbar-inner">
-            <div class="navbar-conntent">
-                <a class="brand" href="#">Wizard</a>
+            <div class="container">
+                <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <div class="nav-collapse collapse">
+                    <ul class="nav">
+                        <li><a href="#">Widget</a></li>
+                        <li><a href="#">></a></li>
+                        <li class="active"><a href="#">{{widget.name}}</a></li>
+                    </ul>
+                </div><!--/.nav-collapse -->
             </div>
         </div>
     </div>
