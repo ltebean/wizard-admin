@@ -1,7 +1,7 @@
 package com.dianping.wizard.admin.resource;
 
-import com.dianping.wizard.repo.GenericRepo;
-import com.dianping.wizard.repo.RepoFactory;
+import com.dianping.wizard.repo.LayoutRepo;
+import com.dianping.wizard.repo.LayoutRepoFactory;
 import com.dianping.wizard.widget.Layout;
 
 import javax.ws.rs.*;
@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/layout")
 public class LayoutOpertion {
 
-    private GenericRepo<Layout> repo= RepoFactory.getRepo(Layout.class);
+    private LayoutRepo repo= LayoutRepoFactory.getRepo("default");
 
     @GET
     @Path("/{name}")

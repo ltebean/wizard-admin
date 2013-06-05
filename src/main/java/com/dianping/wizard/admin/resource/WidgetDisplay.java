@@ -1,7 +1,6 @@
 package com.dianping.wizard.admin.resource;
 
 import com.dianping.wizard.admin.wrapper.RenderingRequest;
-import com.dianping.wizard.widget.Widget;
 import com.dianping.wizard.widget.WidgetRenderer;
 import com.dianping.wizard.widget.WidgetRendererFactory;
 
@@ -26,7 +25,7 @@ public class WidgetDisplay {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String renderWidget(@PathParam("mode") String mode,RenderingRequest request){
-        return renderer.renderWidget(request.widget, mode ,request.param);
+        return renderer.render(request.widget, mode, request.param).output;
     }
 
 

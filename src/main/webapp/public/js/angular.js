@@ -1022,7 +1022,7 @@ function setupModuleLoader(window) {
      * // Create a new module
      * var myModule = angular.module('myModule', []);
      *
-     * // register a new service
+     * // register a new extensions
      * myModule.value('appName', 'MyCoolApp');
      *
      * // configure existing services inside initialization blocks.
@@ -1096,8 +1096,8 @@ function setupModuleLoader(window) {
            * @ngdoc method
            * @name angular.Module#provider
            * @methodOf angular.Module
-           * @param {string} name service name
-           * @param {Function} providerType Construction function for creating new instance of the service.
+           * @param {string} name extensions name
+           * @param {Function} providerType Construction function for creating new instance of the extensions.
            * @description
            * See {@link AUTO.$provide#provider $provide.provider()}.
            */
@@ -1107,8 +1107,8 @@ function setupModuleLoader(window) {
            * @ngdoc method
            * @name angular.Module#factory
            * @methodOf angular.Module
-           * @param {string} name service name
-           * @param {Function} providerFunction Function for creating new instance of the service.
+           * @param {string} name extensions name
+           * @param {Function} providerFunction Function for creating new instance of the extensions.
            * @description
            * See {@link AUTO.$provide#factory $provide.factory()}.
            */
@@ -1116,20 +1116,20 @@ function setupModuleLoader(window) {
 
           /**
            * @ngdoc method
-           * @name angular.Module#service
+           * @name angular.Module#extensions
            * @methodOf angular.Module
-           * @param {string} name service name
+           * @param {string} name extensions name
            * @param {Function} constructor A constructor function that will be instantiated.
            * @description
-           * See {@link AUTO.$provide#service $provide.service()}.
+           * See {@link AUTO.$provide#service $provide.extensions()}.
            */
-          service: invokeLater('$provide', 'service'),
+          service: invokeLater('$provide', 'extensions'),
 
           /**
            * @ngdoc method
            * @name angular.Module#value
            * @methodOf angular.Module
-           * @param {string} name service name
+           * @param {string} name extensions name
            * @param {*} object Service instance object.
            * @description
            * See {@link AUTO.$provide#value $provide.value()}.
@@ -1186,7 +1186,7 @@ function setupModuleLoader(window) {
            * @ngdoc method
            * @name angular.Module#config
            * @methodOf angular.Module
-           * @param {Function} configFn Execute this function on module load. Useful for service
+           * @param {Function} configFn Execute this function on module load. Useful for extensions
            *    configuration.
            * @description
            * Use this method to register work which needs to be performed on module loading.
@@ -2343,7 +2343,7 @@ function annotate(fn) {
  * @methodOf AUTO.$injector
  *
  * @description
- * Return an instance of the service.
+ * Return an instance of the extensions.
  *
  * @param {string} name The name of the instance to retrieve.
  * @return {*} The instance.
@@ -2384,7 +2384,7 @@ function annotate(fn) {
  * @methodOf AUTO.$injector
  *
  * @description
- * Returns an array of service names which the function is requesting for injection. This API is used by the injector
+ * Returns an array of extensions names which the function is requesting for injection. This API is used by the injector
  * to determine which services need to be injected into the function when the function is invoked. There are three
  * ways in which the function can be annotated with the needed dependencies.
  *
@@ -2451,7 +2451,7 @@ function annotate(fn) {
  *    ).toEqual(['$compile', '$rootScope']);
  * </pre>
  *
- * @param {function|Array.<string|Function>} fn Function for which dependent service names need to be retrieved as described
+ * @param {function|Array.<string|Function>} fn Function for which dependent extensions names need to be retrieved as described
  *   above.
  *
  * @returns {Array.<string>} The names of the services which the function requires.
@@ -2470,7 +2470,7 @@ function annotate(fn) {
  * The providers share the same name as the instance they create with the `Provider` suffixed to them.
  *
  * A provider is an object with a `$get()` method. The injector calls the `$get` method to create a new instance of
- * a service. The Provider can have additional methods which would allow for configuration of the provider.
+ * a extensions. The Provider can have additional methods which would allow for configuration of the provider.
  *
  * <pre>
  *   function GreetProvider() {
@@ -2516,7 +2516,7 @@ function annotate(fn) {
  * @methodOf AUTO.$provide
  * @description
  *
- * Register a provider for a service. The providers can be retrieved and can have additional configuration methods.
+ * Register a provider for a extensions. The providers can be retrieved and can have additional configuration methods.
  *
  * @param {string} name The name of the instance. NOTE: the provider will be available under `name + 'Provider'` key.
  * @param {(Object|function())} provider If the provider is:
@@ -2546,11 +2546,11 @@ function annotate(fn) {
 
 /**
  * @ngdoc method
- * @name AUTO.$provide#service
+ * @name AUTO.$provide#extensions
  * @methodOf AUTO.$provide
  * @description
  *
- * A short hand for registering service of given class.
+ * A short hand for registering extensions of given class.
  *
  * @param {string} name The name of the instance.
  * @param {Function} constructor A class (constructor function) that will be instantiated.
@@ -2594,16 +2594,16 @@ function annotate(fn) {
  * @methodOf AUTO.$provide
  * @description
  *
- * Decoration of service, allows the decorator to intercept the service instance creation. The
+ * Decoration of extensions, allows the decorator to intercept the extensions instance creation. The
  * returned instance may be the original instance, or a new instance which delegates to the
  * original instance.
  *
- * @param {string} name The name of the service to decorate.
- * @param {function()} decorator This function will be invoked when the service needs to be
+ * @param {string} name The name of the extensions to decorate.
+ * @param {function()} decorator This function will be invoked when the extensions needs to be
  *    instanciated. The function is called using the {@link AUTO.$injector#invoke
  *    injector.invoke} method and is therefore fully injectable. Local injection arguments:
  *
- *    * `$delegate` - The original service instance, which can be monkey patched, configured,
+ *    * `$delegate` - The original extensions instance, which can be monkey patched, configured,
  *      decorated or delegated to.
  */
 
@@ -2882,7 +2882,7 @@ function $AnchorScrollProvider() {
 }
 
 /**
- * ! This is a private undocumented service !
+ * ! This is a private undocumented extensions !
  *
  * @name ng.$browser
  * @requires $log
@@ -2893,7 +2893,7 @@ function $AnchorScrollProvider() {
  * - abstract away all the browser specific features and inconsistencies
  *
  * For tests we provide {@link ngMock.$browser mock implementation} of the `$browser`
- * service, which can be used for convenient testing of the application without the interaction with
+ * extensions, which can be used for convenient testing of the application without the interaction with
  * the real browser apis.
  */
 /**
@@ -2901,7 +2901,7 @@ function $AnchorScrollProvider() {
  * @param {object} document jQuery wrapped document.
  * @param {function()} XHR XMLHttpRequest constructor.
  * @param {object} $log console.log or an object with the same interface.
- * @param {object} $sniffer $sniffer service
+ * @param {object} $sniffer $sniffer extensions
  */
 function Browser(window, document, $log, $sniffer) {
   var self = this,
@@ -3021,8 +3021,8 @@ function Browser(window, document, $log, $sniffer) {
    * location.href/location.replace is used.
    * Returns its own instance to allow chaining
    *
-   * NOTE: this api is intended for use only by the $location service. Please use the
-   * {@link ng.$location $location service} to change url.
+   * NOTE: this api is intended for use only by the $location extensions. Please use the
+   * {@link ng.$location $location extensions} to change url.
    *
    * @param {string} url New url (when used as setter)
    * @param {boolean=} replace Should new url replace current history record ?
@@ -3079,8 +3079,8 @@ function Browser(window, document, $log, $sniffer) {
    *
    * The listener gets called with new url as parameter.
    *
-   * NOTE: this api is intended for use only by the $location service. Please use the
-   * {@link ng.$location $location service} to monitor url changes in angular apps.
+   * NOTE: this api is intended for use only by the $location extensions. Please use the
+   * {@link ng.$location $location extensions} to monitor url changes in angular apps.
    *
    * @param {function(string)} listener Listener function to be called when url changes.
    * @return {function(string)} Returns the registered listener fn - handy if the fn is anonymous.
@@ -3136,7 +3136,7 @@ function Browser(window, document, $log, $sniffer) {
    *
    * @description
    * The cookies method provides a 'private' low level access to browser cookies.
-   * It is not meant to be used directly, use the $cookie service instead.
+   * It is not meant to be used directly, use the $cookie extensions instead.
    *
    * The return values vary depending on the arguments that the method was called with as follows:
    * <ul>
@@ -3552,7 +3552,7 @@ var NON_ASSIGNABLE_MODEL_EXPRESSION = 'Non-assignable model expression: ';
 
 
 /**
- * @ngdoc service
+ * @ngdoc extensions
  * @name ng.$compileProvider
  * @function
  *
@@ -4554,7 +4554,7 @@ function directiveLinkingFn(
  * @ngdoc object
  * @name ng.$controllerProvider
  * @description
- * The {@link ng.$controller $controller service} is used by Angular to create new
+ * The {@link ng.$controller $controller extensions} is used by Angular to create new
  * controllers.
  *
  * This provider allows controller registration via the
@@ -4600,10 +4600,10 @@ function $ControllerProvider() {
      * @return {Object} Instance of given controller.
      *
      * @description
-     * `$controller` service is responsible for instantiating controllers.
+     * `$controller` extensions is responsible for instantiating controllers.
      *
      * It's just simple call to {@link AUTO.$injector $injector}, but extracted into
-     * a service, so that one can override this service with {@link https://gist.github.com/1649788
+     * a extensions, so that one can override this extensions with {@link https://gist.github.com/1649788
      * BC version}.
      */
     return function(constructor, locals) {
@@ -4642,11 +4642,11 @@ function $DocumentProvider(){
  * @requires $log
  *
  * @description
- * Any uncaught exception in angular expressions is delegated to this service.
+ * Any uncaught exception in angular expressions is delegated to this extensions.
  * The default implementation simply delegates to `$log.error` which logs it into
  * the browser console.
  *
- * In unit tests, if `angular-mocks.js` is loaded, this service is overridden by
+ * In unit tests, if `angular-mocks.js` is loaded, this extensions is overridden by
  * {@link ngMock.$exceptionHandler mock $exceptionHandler}
  *
  * @param {Error} exception Exception associated with the error.
@@ -4724,8 +4724,8 @@ function $InterpolateProvider() {
      *
      * @description
      *
-     * Compiles a string with markup into an interpolation function. This service is used by the
-     * HTML {@link ng.$compile $compile} service for data binding. See
+     * Compiles a string with markup into an interpolation function. This extensions is used by the
+     * HTML {@link ng.$compile $compile} extensions for data binding. See
      * {@link ng.$interpolateProvider $interpolateProvider} for configuring the
      * interpolation markup.
      *
@@ -4900,7 +4900,7 @@ function convertToHashbangUrl(url, basePath, hashPrefix) {
 
 /**
  * LocationUrl represents an url
- * This object is exposed as $location service when HTML5 mode is enabled and supported
+ * This object is exposed as $location extensions when HTML5 mode is enabled and supported
  *
  * @constructor
  * @param {string} url HTML5 url
@@ -4947,7 +4947,7 @@ function LocationUrl(url, pathPrefix) {
 
 /**
  * LocationHashbangUrl represents url
- * This object is exposed as $location service when html5 history api is disabled or not supported
+ * This object is exposed as $location extensions when html5 history api is disabled or not supported
  *
  * @constructor
  * @param {string} url Legacy url
@@ -5213,12 +5213,12 @@ function locationGetterSetter(property, preprocess) {
  * @requires $rootElement
  *
  * @description
- * The $location service parses the URL in the browser address bar (based on the
+ * The $location extensions parses the URL in the browser address bar (based on the
  * {@link https://developer.mozilla.org/en/window.location window.location}) and makes the URL
  * available to your application. Changes to the URL in the address bar are reflected into
- * $location service and changes to $location are reflected into the browser address bar.
+ * $location extensions and changes to $location are reflected into the browser address bar.
  *
- * **The $location service:**
+ * **The $location extensions:**
  *
  * - Exposes the current URL in the browser address bar, so you can
  *   - Watch and observe the URL.
@@ -5392,10 +5392,10 @@ function $LocationProvider(){
  * @requires $window
  *
  * @description
- * Simple service for logging. Default implementation writes the message
+ * Simple extensions for logging. Default implementation writes the message
  * into the browser's console (if present).
  *
- * The main purpose of this service is to simplify debugging and troubleshooting.
+ * The main purpose of this extensions is to simplify debugging and troubleshooting.
  *
  * @example
     <doc:example>
@@ -6789,7 +6789,7 @@ function $RouteProvider(){
    *      `$aftreRouteChange` event is fired. The map object is:
    *
    *      - `key` – `{string}`: a name of a dependency to be injected into the controller.
-   *      - `factory` - `{string|function}`: If `string` then it is an alias for a service.
+   *      - `factory` - `{string|function}`: If `string` then it is an alias for a extensions.
    *        Otherwise if function, then it is {@link api/AUTO.$injector#invoke injected}
    *        and the return value is treated as the dependency. If the result is a promise, it is resolved
    *        before its value is injected into the controller.
@@ -6816,7 +6816,7 @@ function $RouteProvider(){
    * @returns {Object} self
    *
    * @description
-   * Adds a new route definition to the `$route` service.
+   * Adds a new route definition to the `$route` extensions.
    */
   this.when = function(path, route) {
     routes[path] = extend({reloadOnSearch: true}, route);
@@ -6864,7 +6864,7 @@ function $RouteProvider(){
      * The route definition contains:
      *
      *   - `controller`: The controller constructor as define in route definition.
-     *   - `locals`: A map of locals which is used by {@link ng.$controller $controller} service for
+     *   - `locals`: A map of locals which is used by {@link ng.$controller $controller} extensions for
      *     controller instantiation. The `locals` contain
      *     the resolved values of the `resolve` map. Additionally the `locals` also contain:
      *
@@ -6879,8 +6879,8 @@ function $RouteProvider(){
      *
      * You can define routes through {@link ng.$routeProvider $routeProvider}'s API.
      *
-     * The `$route` service is typically used in conjunction with {@link ng.directive:ngView ngView}
-     * directive and the {@link ng.$routeParams $routeParams} service.
+     * The `$route` extensions is typically used in conjunction with {@link ng.directive:ngView ngView}
+     * directive and the {@link ng.$routeParams $routeParams} extensions.
      *
      * @example
        This example shows how changing the URL hash causes the `$route` to match a route against the
@@ -7044,7 +7044,7 @@ function $RouteProvider(){
            * @methodOf ng.$route
            *
            * @description
-           * Causes `$route` service to reload the current route even if
+           * Causes `$route` extensions to reload the current route even if
            * {@link ng.$location $location} hasn't changed.
            *
            * As a result of that, {@link ng.directive:ngView ngView}
@@ -7209,7 +7209,7 @@ function $RouteProvider(){
  *
  * In case of parameter name collision, `path` params take precedence over `search` params.
  *
- * The service guarantees that the identity of the `$routeParams` object will remain unchanged
+ * The extensions guarantees that the identity of the `$routeParams` object will remain unchanged
  * (but its properties will likely change) even when a route change occurs.
  *
  * @example
@@ -7257,7 +7257,7 @@ function $RouteParamsProvider() {
  * @name ng.$rootScopeProvider
  * @description
  *
- * Provider for the $rootScope service.
+ * Provider for the $rootScope extensions.
  */
 
 /**
@@ -7346,11 +7346,11 @@ function $RootScopeProvider(){
      * </pre>
      *
      *
-     * @param {Object.<string, function()>=} providers Map of service factory which need to be provided
+     * @param {Object.<string, function()>=} providers Map of extensions factory which need to be provided
      *     for the current scope. Defaults to {@link ng}.
      * @param {Object.<string, *>=} instanceCache Provides pre-instantiated services which should
      *     append/override services provided by `providers`. This is handy when unit-testing and having
-     *     the need to override a default service.
+     *     the need to override a default extensions.
      * @returns {Object} Newly created scope.
      *
      */
@@ -7751,7 +7751,7 @@ function $RootScopeProvider(){
        *     `expression` execution.
        *
        * Any exceptions from the execution of the expression are forwarded to the
-       * {@link ng.$exceptionHandler $exceptionHandler} service.
+       * {@link ng.$exceptionHandler $exceptionHandler} extensions.
        *
        * @param {(string|function())=} expression An angular expression to be executed.
        *
@@ -7797,7 +7797,7 @@ function $RootScopeProvider(){
        * 1. The {@link guide/expression expression} is executed using the
        *    {@link ng.$rootScope.Scope#$eval $eval()} method.
        * 2. Any exceptions from the execution of the expression are forwarded to the
-       *    {@link ng.$exceptionHandler $exceptionHandler} service.
+       *    {@link ng.$exceptionHandler $exceptionHandler} extensions.
        * 3. The {@link ng.$rootScope.Scope#$watch watch} listeners are fired immediately after the expression
        *    was executed using the {@link ng.$rootScope.Scope#$digest $digest()} method.
        *
@@ -7880,7 +7880,7 @@ function $RootScopeProvider(){
        * listeners along the way. The event will stop propagating if one of the listeners cancels it.
        *
        * Any exception emmited from the {@link ng.$rootScope.Scope#$on listeners} will be passed
-       * onto the {@link ng.$exceptionHandler $exceptionHandler} service.
+       * onto the {@link ng.$exceptionHandler $exceptionHandler} extensions.
        *
        * @param {string} name Event name to emit.
        * @param {...*} args Optional set of arguments which will be passed onto the event listeners.
@@ -7938,7 +7938,7 @@ function $RootScopeProvider(){
        * calls all registered listeners along the way. The event cannot be canceled.
        *
        * Any exception emmited from the {@link ng.$rootScope.Scope#$on listeners} will be passed
-       * onto the {@link ng.$exceptionHandler $exceptionHandler} service.
+       * onto the {@link ng.$exceptionHandler $exceptionHandler} extensions.
        *
        * @param {string} name Event name to emit.
        * @param {...*} args Optional set of arguments which will be passed onto the event listeners.
@@ -8016,7 +8016,7 @@ function $RootScopeProvider(){
 }
 
 /**
- * !!! This is an undocumented "private" service !!!
+ * !!! This is an undocumented "private" extensions !!!
  *
  * @name ng.$sniffer
  * @requires $window
@@ -8068,7 +8068,7 @@ function $SnifferProvider() {
  * A reference to the browser's `window` object. While `window`
  * is globally available in JavaScript, it causes testability problems, because
  * it is a global variable. In angular we always refer to it through the
- * `$window` service, so it may be overriden, removed or mocked for testing.
+ * `$window` extensions, so it may be overriden, removed or mocked for testing.
  *
  * All expressions are evaluated with respect to current scope so they don't
  * suffer from window globality.
@@ -8076,7 +8076,7 @@ function $SnifferProvider() {
  * @example
    <doc:example>
      <doc:source>
-       <input ng-init="$window = $service('$window'); greeting='Hello World!'" type="text" ng-model="greeting" />
+       <input ng-init="$window = $extensions('$window'); greeting='Hello World!'" type="text" ng-model="greeting" />
        <button ng-click="$window.alert(greeting)">ALERT</button>
      </doc:source>
      <doc:scenario>
@@ -8231,23 +8231,23 @@ function $HttpProvider() {
      * @requires $injector
      *
      * @description
-     * The `$http` service is a core Angular service that facilitates communication with the remote
+     * The `$http` extensions is a core Angular extensions that facilitates communication with the remote
      * HTTP servers via browser's {@link https://developer.mozilla.org/en/xmlhttprequest
      * XMLHttpRequest} object or via {@link http://en.wikipedia.org/wiki/JSONP JSONP}.
      *
-     * For unit testing applications that use `$http` service, see
+     * For unit testing applications that use `$http` extensions, see
      * {@link ngMock.$httpBackend $httpBackend mock}.
      *
      * For a higher level of abstraction, please check out the {@link ngResource.$resource
-     * $resource} service.
+     * $resource} extensions.
      *
      * The $http API is based on the {@link ng.$q deferred/promise APIs} exposed by
-     * the $q service. While for simple usage patters this doesn't matter much, for advanced usage,
+     * the $q extensions. While for simple usage patters this doesn't matter much, for advanced usage,
      * it is important to familiarize yourself with these apis and guarantees they provide.
      *
      *
      * # General usage
-     * The `$http` service is a function which takes a single argument — a configuration object —
+     * The `$http` extensions is a function which takes a single argument — a configuration object —
      * that is used to generate an http request and returns  a {@link ng.$q promise}
      * with two $http specific methods: `success` and `error`.
      *
@@ -8272,7 +8272,7 @@ function $HttpProvider() {
      *
      * # Shortcut methods
      *
-     * Since all invocation of the $http service require definition of the http method and url and
+     * Since all invocation of the $http extensions require definition of the http method and url and
      * POST and PUT requests require response body/data to be provided as well, shortcut methods
      * were created to simplify using the api:
      *
@@ -8293,7 +8293,7 @@ function $HttpProvider() {
      *
      * # Setting HTTP Headers
      *
-     * The $http service will automatically add certain http headers to all requests. These defaults
+     * The $http extensions will automatically add certain http headers to all requests. These defaults
      * can be fully configured by accessing the `$httpProvider.defaults.headers` configuration
      * object, which currently contains this default configuration:
      *
@@ -8360,13 +8360,13 @@ function $HttpProvider() {
      * initiated these requests. The response interceptors leverage the {@link ng.$q
      * promise apis} to fulfil this need for both synchronous and asynchronous preprocessing.
      *
-     * The interceptors are service factories that are registered with the $httpProvider by
+     * The interceptors are extensions factories that are registered with the $httpProvider by
      * adding them to the `$httpProvider.responseInterceptors` array. The factory is called and
      * injected with dependencies (if specified) and returns the interceptor  — a function that
      * takes a {@link ng.$q promise} and returns the original or a new promise.
      *
      * <pre>
-     *   // register the interceptor as a service
+     *   // register the interceptor as a extensions
      *   $provide.factory('myHttpInterceptor', function($q, dependency1, dependency2) {
      *     return function(promise) {
      *       return promise.then(function(response) {
@@ -8431,7 +8431,7 @@ function $HttpProvider() {
      *
      * {@link http://en.wikipedia.org/wiki/Cross-site_request_forgery XSRF} is a technique by which
      * an unauthorized site can gain your user's private data. Angular provides following mechanism
-     * to counter XSRF. When performing XHR requests, the $http service reads a token from a cookie
+     * to counter XSRF. When performing XHR requests, the $http extensions reads a token from a cookie
      * called `XSRF-TOKEN` and sets it as the HTTP header `X-XSRF-TOKEN`. Since only JavaScript that
      * runs on your domain could read the cookie, your server can be assured that the XHR came from
      * JavaScript running on your domain.
@@ -8866,10 +8866,10 @@ var XHR = window.XMLHttpRequest || function() {
  * @requires $document
  *
  * @description
- * HTTP backend used by the {@link ng.$http service} that delegates to
+ * HTTP backend used by the {@link ng.$http extensions} that delegates to
  * XMLHttpRequest object or JSONP and deals with browser incompatibilities.
  *
- * You should never need to use this service directly, instead use the higher-level abstractions:
+ * You should never need to use this extensions directly, instead use the higher-level abstractions:
  * {@link ng.$http $http} or {@link ngResource.$resource $resource}.
  *
  * During testing this implementation is swapped with {@link ngMock.$httpBackend mock
@@ -8938,7 +8938,7 @@ function createHttpBackend($browser, XHR, $browserDefer, callbacks, rawDocument,
 
 
     function completeRequest(callback, status, response, headersString) {
-      // URL_MATCH is defined in src/service/location.js
+      // URL_MATCH is defined in src/extensions/location.js
       var protocol = (url.match(URL_MATCH) || ['', locationProtocol])[1];
 
       // fix status code for file protocol (it's always 0)
@@ -8982,7 +8982,7 @@ function createHttpBackend($browser, XHR, $browserDefer, callbacks, rawDocument,
  * @name ng.$locale
  *
  * @description
- * $locale service provides localization rules for various Angular components. As of right now the
+ * $locale extensions provides localization rules for various Angular components. As of right now the
  * only public api is:
  *
  * * `id` – `{string}` – locale id formatted as `languageId-countryId` (e.g. `en-us`)
@@ -9062,7 +9062,7 @@ function $TimeoutProvider() {
       * @description
       * Angular's wrapper for `window.setTimeout`. The `fn` function is wrapped into a try/catch
       * block and delegates any exceptions to
-      * {@link ng.$exceptionHandler $exceptionHandler} service.
+      * {@link ng.$exceptionHandler $exceptionHandler} extensions.
       *
       * The return value of registering a timeout function is a promise which will be resolved when
       * the timeout is reached and the timeout function is executed.
@@ -9145,15 +9145,15 @@ function $TimeoutProvider() {
  * <pre>
  *   // Filter registration
  *   function MyModule($provide, $filterProvider) {
- *     // create a service to demonstrate injection (not always needed)
+ *     // create a extensions to demonstrate injection (not always needed)
  *     $provide.value('greet', function(name){
  *       return 'Hello ' + name + '!';
  *     });
  *
  *     // register a filter factory which uses the
- *     // greet service to demonstrate DI.
+ *     // greet extensions to demonstrate DI.
  *     $filterProvider.register('greet', function(greet){
- *       // return the filter function which uses the greet service
+ *       // return the filter function which uses the greet extensions
  *       // to generate salutation
  *       return function(text) {
  *         // filters need to be forgiving so check input validity
@@ -12301,7 +12301,7 @@ var ngCloakDirective = ngDirective({
  *   methods that typically express the business logic behind the application.
  *
  * Note that an alternative way to define controllers is via the `{@link ng.$route}`
- * service.
+ * extensions.
  *
  * @element ANY
  * @scope
@@ -13022,7 +13022,7 @@ var ngPluralizeDirective = ['$locale', '$interpolate', function($locale, $interp
 
         if (!isNaN(value)) {
           //if explicit number rule such as 1, 2, 3... is defined, just use it. Otherwise,
-          //check it against pluralization rules in $locale service
+          //check it against pluralization rules in $locale extensions
           if (!whens[value]) value = $locale.pluralCat(value - offset);
            return whensExpFns[value](scope, element, true);
         } else {
@@ -13515,10 +13515,10 @@ var ngTranscludeDirective = ngDirective({
  *
  * @description
  * # Overview
- * `ngView` is a directive that complements the {@link ng.$route $route} service by
+ * `ngView` is a directive that complements the {@link ng.$route $route} extensions by
  * including the rendered template of the current route into the main layout (`index.html`) file.
  * Every time the current route changes, the included view changes with it according to the
- * configuration of the `$route` service.
+ * configuration of the `$route` extensions.
  *
  * @scope
  * @example

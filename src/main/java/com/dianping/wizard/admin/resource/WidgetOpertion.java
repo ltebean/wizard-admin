@@ -1,7 +1,9 @@
 package com.dianping.wizard.admin.resource;
 
 import com.dianping.wizard.repo.GenericRepo;
-import com.dianping.wizard.repo.RepoFactory;
+import com.dianping.wizard.repo.GenericRepoFactory;
+import com.dianping.wizard.repo.WidgetRepo;
+import com.dianping.wizard.repo.WidgetRepoFactory;
 import com.dianping.wizard.widget.Widget;
 
 import javax.ws.rs.*;
@@ -18,7 +20,7 @@ import javax.ws.rs.core.MediaType;
 @Path("/widget")
 public class WidgetOpertion {
 
-    private GenericRepo<Widget> repo= RepoFactory.getRepo(Widget.class);
+    private WidgetRepo repo= WidgetRepoFactory.getRepo("default");
 
     @GET
     @Path("/{name}")
