@@ -1,152 +1,268 @@
 <!doctype html>
 <html ng-app>
 <head>
-    <title>Wizard - Widget Config</title>
+    <title>Wizard Admin Console</title>
     <link href="/public/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="/public/css/flat-ui.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/public/css/ace.min.css"/>
+    <link rel="stylesheet" href="/public/css/ace-responsive.min.css"/>
+    <link rel="stylesheet" href="/public/css/ace-skins.min.css"/>
     <script src="/public/js/angular.js"></script>
     <script type="text/javascript" src="/public/js/jquery.min.js"></script>
     <script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
-    <style>
-        .container {
-            width: 1024px;
-        }
-        textarea {
-            width:400px;
-            height:150px;
-        }
-        .display {
-            margin-bottom:50px;
+    <script src="/public/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <style type="text/css">
+        #editor {
+            position: absolute;
+            width: 100%;
+            height: 768px;
+            font-size: 14px;
         }
     </style>
     <script type="text/javascript">
-        var config={};
-        function Controller ($scope,$http) {
+        function Controller($scope, $http) {
             function getURLParameter(name) {
-                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [, ""])[1].replace(/\+/g, '%20')) || null;
             }
-            var widgetName=getURLParameter("name");
-            var loadWidget=function(){
-                $http.get("/api/widget/"+widgetName)
-                        .success(function(data) {
-                            $scope.widget=data;
-                            config=data.config;
-                        }).error(function(data) {
+
+            $scope.themes = ["eclipse", "textmate", "cobalt", "monokai", "github", "clouds", "chaos", "twilight", "dawn", "terminal"];
+
+            var widgetName = getURLParameter("name");
+
+            var loadWidget = function () {
+                $http.get("/api/widget/" + widgetName)
+                        .success(function (data) {
+                            $scope.widget = data;
+                            $scope.currentEdit = "code";
+                            $scope.viewCode("code");
+                        }).error(function (data) {
                             alert("server error");
                         });
             }
+            var initEditor = function () {
+                $scope.editor = ace.edit("editor");
+                $scope.chooseTheme("eclipse");
+
+            }
+
+            $scope.chooseTheme = function (theme) {
+                $scope.editor.setTheme("ace/theme/" + theme);
+            }
+
+
+            $scope.viewCode = function (codeType) {
+                if ($scope.editor.getValue() != "") {
+                    $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
+                }
+                if (codeType == "code") {
+                    $scope.editor.getSession().setMode("ace/mode/groovy");
+                } else if (codeType == "template") {
+                    $scope.editor.getSession().setMode("ace/mode/ftl");
+                } else if (codeType == "script") {
+                    $scope.editor.getSession().setMode("ace/mode/javascript");
+                }
+                $scope.editor.setValue($scope.widget.modes.display[codeType]);
+                $scope.editor.gotoLine(1);
+                $scope.currentEdit = codeType;
+            }
+
 
             loadWidget();
+            initEditor();
 
-            var updateWidget=function(){
-                $scope.widget.config=config;
-                $http.post("/api/widget/",$scope.widget)
-                        .success(function(data) {
-                        }).error(function(data) {
+            $scope.updateWidget = function () {
+                $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
+                $http.post("/api/widget/", $scope.widget)
+                        .success(function (data) {
+                            showToolTip($("#save-btn"), {title: 'saved', trigger: 'manual'})
+                        }).error(function (data) {
                             alert("server error");
                         });
             }
 
-            $scope.renderWidget=function(mode){
-                if($scope.paramString==undefined){
-                    $scope.paramString='{}';
-                }
-                var body={
-                    param:JSON.parse($scope.paramString),
-                    widget:$scope.widget
-                }
-                $http.post("/api/widget-output/"+mode,body)
-                        .success(function(data) {
-                            $scope[mode]=data;
-                            updateWidget();
-                            setTimeout(function(){
-                                eval($scope.widget.modes[mode].script);
-                            },500);
+            var showToolTip = function (el, options) {
+                el.tooltip(options).tooltip('show');
+                setTimeout(function () {
+                    el.tooltip('hide');
+                }, 2000)
+            }
 
-                        }).error(function(data) {
+            $scope.renderWidget = function (mode) {
+                $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
+                if ($scope.paramString == undefined) {
+                    $scope.paramString = '{}';
+                }
+                var body = {
+                    param: JSON.parse($scope.paramString),
+                    widget: $scope.widget
+                }
+                $http.post("/api/widget-output/" + mode, body)
+                        .success(function (data) {
+                            preview(data);
+                        }).error(function (data) {
                             alert("server error");
                         });
+            }
+
+            var preview = function (html) {
+                var w = window.open("blank");
+                w.document.write(html);
             }
         }
     </script>
 </head>
 <body ng-controller="Controller">
-<div id="wrap">
-    <div class="navbar navbar-inverse">
-        <div class="navbar-inner">
-            <div class="container">
-                <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <div class="nav-collapse collapse">
-                    <ul class="nav">
-                        <li><a href="#">Widget</a></li>
-                        <li><a href="#">></a></li>
-                        <li class="active"><a href="#">{{widget.name}}</a></li>
+<div class="navbar">
+    <div class="navbar-inner" style="background: rgb(66, 66, 66);">
+        <div class="container-fluid navbar-conntent">
+            <a class="brand" href="#">Wizard</a>
+            <ul class="nav ace-nav pull-left">
+                <li class="grey">
+                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                        <i class="icon-pencil"></i>
+                        Action
+                    </a>
+                    <ul class="pull-left dropdown-navbar navbar-pink dropdown-menu dropdown-caret dropdown-closer">
+                        <li>
+                            <a href="javascript:;" ng-click="">create widget</a>
+                        </li>
                     </ul>
-                </div><!--/.nav-collapse -->
-            </div>
-        </div>
-    </div>
-    <div class="container">
-        <div class="control-group">
-            <h4>Config Param:</h4>
-            <input type="text" id="shopId"  ng-model="paramString" placeholder="">
-        </div>
+                </li>
+            </ul>
+            <ul class="nav ace-nav pull-right">
+                <li class="grey">
+                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                        <i class="icon-headphones"></i>
+                        Theme
+                    </a>
 
-        <div class="control-group">
-            <h4>Config Rule:</h4>
-            <textarea type="text"  ng-model="widget.rule" placeholder=""></textarea>
-        </div>
-        <div class="control-group">
-            <h4>Config layout:</h4>
-            <input type="text"  ng-model="widget.layoutName" placeholder="">
+                    <ul class="pull-right dropdown-navbar navbar-pink dropdown-menu dropdown-caret dropdown-closer">
+                        <li class="nav-header">
+                            <i class="icon-warning-sign"></i>Choose Theme
+                        </li>
+                        <li ng-repeat="theme in themes">
+                            <a href="javascript:;" ng-click="chooseTheme(theme)">{{theme}}</a>
+                        </li>
+
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
-    <div class="container display">
-        <ul class="nav nav-tabs">
-            <li><a href="#display" data-toggle="tab" ng-click="renderWidget('display')">Display Mode</a></li>
-            <li><a href="#config" data-toggle="tab" ng-click="renderWidget('config')">Config Mode</a></li>
+</div>
+<div class="container-fluid" id="main-container">
+    <div id="sidebar">
+        <ul class="nav nav-list">
+            <li>
+                <a ng-click="viewCode('code')">{{widget.name}}.groovy</a>
+            </li>
+            <li>
+                <a ng-click="viewCode('template')">{{widget.name}}.ftl</a>
+            </li>
+            <li>
+                <a ng-click="viewCode('script')">{{widget.name}}.js</a>
+            </li>
         </ul>
-        <div class="tab-content">
-            <div class="tab-pane active" ng-bind-html-unsafe="display" id="display">
+    </div>
+    <div id="main-content">
+        <div id="breadcrumbs">
+            <div id="sidebar-shortcuts">
+                <div id="sidebar-shortcuts-large" style="text-align:left;padding-left:3px;">
+                    <button id="save-btn" data-toggle="modal" href="#submitDialog" class="btn btn-small btn-inverse">
+                        <i class="icon-ok"></i>
+                    </button>
+                    <button id="preview-btn" data-toggle="modal" href="#previewDialog"
+                            class="btn btn-small btn-inverse">
+                        <i class="icon-picture"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-caret dropdown-closer">
+                        <li class="nav-header">
+                            <i class="icon-warning-sign"></i>Choose Theme
+                        </li>
+                    </ul>
+                    <button id="revert-btn" data-toggle="dropdown" class="dropdown-toggle btn btn-small btn-inverse">
+                        <i class="icon-retweet"></i>
+                    </button>
+                    <ul class="pull-left dropdown-menu dropdown-caret dropdown-closer" style="width:300px;">
+                        <li class="nav-header">
+                            <i class="icon-warning-sign"></i>Choose Version
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div class="clearfix">
+                                    <span class="pull-left">fix bug</span>
+                                    <span class="pull-right badge badge-info">cong.yu</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div class="clearfix">
+                                    <span class="pull-left">add feature</span>
+                                    <span class="pull-right badge badge-info">cong.yu</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <div class="clearfix">
+                                    <span class="pull-left">init</span>
+                                    <span class="pull-right badge badge-info">cong.yu</span>
+                                </div>
+                            </a>
+                        </li>
+
+                    </ul>
+                    <button id="delete-btn" class="btn btn-small btn-inverse">
+                        <i class="icon-trash"></i>
+                    </button>
+                </div>
             </div>
+        </div>
+        <div style="position: relative;padding:0px" id="page-content">
+            <div id="editor"></div>
+        </div>
+    </div>
+</div>
+<div id="previewDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-header">
+        <h3>Config Param</h3>
+    </div>
+    <div class="modal-body form-horizontal">
+        <div class="control-group">
+            <label class="control-label">params:</label>
 
-            <div class="tab-pane" id="config" ng-bind-html-unsafe="config">
-
+            <div class="controls">
+                <input type="text" ng-model="paramString" class="input-xlarge">
             </div>
         </div>
     </div>
-    <div class="container row">
-        <div class="span6">
-            <form>
-                <fieldset>
-                    <legend>Display</legend>
-                    <label>code</label>
-                    <textarea rows="5" ng-model="widget.modes.display.code"></textarea>
-                    <label>template</label>
-                    <textarea ng-model="widget.modes.display.template" rows="5"></textarea>
-                    <label>script</label>
-                    <textarea ng-model="widget.modes.display.script" rows="5"></textarea>
+    <div class="modal-footer">
+        <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+        <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                ng-click="renderWidget('display')">preview
+        </button>
+    </div>
+</div>
+<div id="submitDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-header">
+        <h3>Enter Comment</h3>
+    </div>
+    <div class="modal-body form-horizontal">
+        <div class="control-group">
+            <label class="control-label">comment:</label>
 
-                </fieldset>
-            </form>
+            <div class="controls">
+                <input type="text" ng-model="comment" class="input-xlarge">
+            </div>
         </div>
-        <div class="span6">
-            <form>
-                <fieldset>
-                    <legend>Config</legend>
-                    <label>code</label>
-                    <textarea rows="5" ng-model="widget.modes.config.code"></textarea>
-                    <label>template</label>
-                    <textarea ng-model="widget.modes.config.template" rows="5"></textarea>
-                    <label>script</label>
-                    <textarea ng-model="widget.modes.config.script" rows="5"></textarea>
-                </fieldset>
-            </form>
-        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+        <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true" ng-click="updateWidget()">
+            submit
+        </button>
     </div>
 </div>
 </body>
