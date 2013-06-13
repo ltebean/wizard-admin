@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/public/css/ace.min.css"/>
     <link rel="stylesheet" href="/public/css/ace-responsive.min.css"/>
     <link rel="stylesheet" href="/public/css/ace-skins.min.css"/>
+    <script type="text/javascript" src="/public/js/js-yaml.js"></script>
     <script src="/public/js/angular.js"></script>
     <script type="text/javascript" src="/public/js/jquery.min.js"></script>
     <script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
@@ -50,30 +51,57 @@
 
 
             $scope.viewCode = function (codeType) {
-                if ($scope.editor.getValue() != "") {
-                    $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
+                //save content to model
+                if(codeType!=$scope.currentEdit){
+                    updateModel();
                 }
+                //change editor mode
                 if (codeType == "code") {
                     $scope.editor.getSession().setMode("ace/mode/groovy");
                 } else if (codeType == "template") {
                     $scope.editor.getSession().setMode("ace/mode/ftl");
                 } else if (codeType == "script") {
                     $scope.editor.getSession().setMode("ace/mode/javascript");
+                } else if (codeType=="config"){
+                    $scope.editor.getSession().setMode("ace/mode/yaml");
                 }
-                $scope.editor.setValue($scope.widget.modes.display[codeType]);
+
+                //change editor content
+                if(codeType=="config"){
+                    var content=jsyaml.dump({layoutName:$scope.widget.layoutName,layoutRule:$scope.widget.layoutRule});
+                    $scope.editor.setValue(content);
+                }else{
+                    $scope.editor.setValue($scope.widget.modes.display[codeType]);
+                }
                 $scope.editor.gotoLine(1);
                 $scope.currentEdit = codeType;
             }
 
+            var updateModel=function(){
+                if($scope.editor.getValue()!=""){
+                    if($scope.currentEdit=="config"){
+                        var config=jsyaml.load($scope.editor.getValue());
+                        $scope.widget.layoutName=(config && config.layoutName)||"";
+                        $scope.widget.layoutRule=(config && config.layoutRule)||"";
+                    }else{
+                        $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
+                    }
+                }
+            }
 
-            loadWidget();
-            initEditor();
+
+
 
             $scope.updateWidget = function () {
-                $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
-                $http.post("/api/widget/", $scope.widget)
+                updateModel();
+                var requestBody={
+                    comment:$scope.comment,
+                    author:"ltebean",
+                    widget:$scope.widget
+                }
+                $http.post("/api/widget/",requestBody)
                         .success(function (data) {
-                            showToolTip($("#save-btn"), {title: 'saved', trigger: 'manual'})
+                            showToolTip($("#save-btn"), {title: 'saved', trigger: 'manual',placement:"bottom"})
                         }).error(function (data) {
                             alert("server error");
                         });
@@ -87,12 +115,12 @@
             }
 
             $scope.renderWidget = function (mode) {
-                $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
-                if ($scope.paramString == undefined) {
-                    $scope.paramString = '{}';
+                updateModel();
+                if ($scope.paramScript == undefined) {
+                    $scope.paramScript = '';
                 }
                 var body = {
-                    param: JSON.parse($scope.paramString),
+                    paramScript: $scope.paramScript,
                     widget: $scope.widget
                 }
                 $http.post("/api/widget-output/" + mode, body)
@@ -107,6 +135,27 @@
                 var w = window.open("blank");
                 w.document.write(html);
             }
+
+            $scope.loadHistory = function (page) {
+                $http.get("/api/widget/" + widgetName+"/history?page="+(page||0))
+                        .success(function (data) {
+                            if(page==0){
+                                $scope.histories=[];
+                            }
+                            $scope.histories = $scope.histories.concat(data);
+                        }).error(function (data) {
+                            alert("server error");
+                        });
+            }
+
+            $scope.revertToHistory=function(history){
+                $scope.widget=history.widget;
+                $scope.currentEdit="code";
+                $scope.viewCode("code");
+            }
+
+            loadWidget();
+            initEditor();
         }
     </script>
 </head>
@@ -115,19 +164,6 @@
     <div class="navbar-inner" style="background: rgb(66, 66, 66);">
         <div class="container-fluid navbar-conntent">
             <a class="brand" href="#">Wizard</a>
-            <ul class="nav ace-nav pull-left">
-                <li class="grey">
-                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                        <i class="icon-pencil"></i>
-                        Action
-                    </a>
-                    <ul class="pull-left dropdown-navbar navbar-pink dropdown-menu dropdown-caret dropdown-closer">
-                        <li>
-                            <a href="javascript:;" ng-click="">create widget</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
             <ul class="nav ace-nav pull-right">
                 <li class="grey">
                     <a data-toggle="dropdown" class="dropdown-toggle" href="#">
@@ -161,6 +197,9 @@
             <li>
                 <a ng-click="viewCode('script')">{{widget.name}}.js</a>
             </li>
+            <li>
+                <a ng-click="viewCode('config')">{{widget.name}}.widget</a>
+            </li>
         </ul>
     </div>
     <div id="main-content">
@@ -179,34 +218,18 @@
                             <i class="icon-warning-sign"></i>Choose Theme
                         </li>
                     </ul>
-                    <button id="revert-btn" data-toggle="dropdown" class="dropdown-toggle btn btn-small btn-inverse">
+                    <button ng-click="loadHistory(0)" id="revert-btn" data-toggle="dropdown" class="dropdown-toggle btn btn-small btn-inverse">
                         <i class="icon-retweet"></i>
                     </button>
                     <ul class="pull-left dropdown-menu dropdown-caret dropdown-closer" style="width:300px;">
                         <li class="nav-header">
                             <i class="icon-warning-sign"></i>Choose Version
                         </li>
-                        <li>
-                            <a href="#">
+                        <li ng-repeat="history in histories">
+                            <a href="#" ng-click="revertToHistory(history)">
                                 <div class="clearfix">
-                                    <span class="pull-left">fix bug</span>
-                                    <span class="pull-right badge badge-info">cong.yu</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <div class="clearfix">
-                                    <span class="pull-left">add feature</span>
-                                    <span class="pull-right badge badge-info">cong.yu</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <div class="clearfix">
-                                    <span class="pull-left">init</span>
-                                    <span class="pull-right badge badge-info">cong.yu</span>
+                                    <span class="pull-left">{{history.comment}}</span>
+                                    <span class="pull-right badge badge-info">{{history.author}}</span>
                                 </div>
                             </a>
                         </li>
@@ -233,7 +256,7 @@
             <label class="control-label">params:</label>
 
             <div class="controls">
-                <input type="text" ng-model="paramString" class="input-xlarge">
+                <textarea style="height: 100px;width:300px;" ng-model="paramScript"></textarea>
             </div>
         </div>
     </div>

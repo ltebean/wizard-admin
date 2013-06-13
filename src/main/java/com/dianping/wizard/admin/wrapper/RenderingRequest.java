@@ -15,6 +15,6 @@ public class RenderingRequest {
 
     public Widget widget;
 
-    public Map<String,Object> param;
+    public String paramScript;
 
 }

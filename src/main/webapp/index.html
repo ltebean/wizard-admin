@@ -1,0 +1,135 @@
+<!doctype html>
+<html ng-app>
+<head>
+    <title>Wizard Admin Console</title>
+    <link href="/public/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/public/css/ace.min.css"/>
+    <link rel="stylesheet" href="/public/css/ace-responsive.min.css"/>
+    <link rel="stylesheet" href="/public/css/ace-skins.min.css"/>
+    <script src="/public/js/angular.js"></script>
+    <script type="text/javascript" src="/public/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
+    <script src="/public/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <style type="text/css">
+        #editor {
+            position: absolute;
+            width: 100%;
+            height: 768px;
+            font-size: 14px;
+        }
+
+    </style>
+    <script type="text/javascript">
+        function Controller($scope, $http) {
+            function getURLParameter(name) {
+                return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [, ""])[1].replace(/\+/g, '%20')) || null;
+            }
+        }
+    </script>
+</head>
+<body ng-controller="Controller">
+<div class="navbar">
+    <div class="navbar-inner" style="background: rgb(66, 66, 66);">
+        <div class="container-fluid navbar-conntent">
+            <a class="brand" href="#">Wizard</a>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="main-container">
+    <div id="sidebar">
+        <div id="sidebar-shortcuts">
+            <div id="sidebar-shortcuts-large">
+                <button class="btn btn-small btn-inverse">
+                    <i class="icon-signal"></i>
+                </button>
+
+                <button class="btn btn-small btn-inverse">
+                    <i class="icon-pencil"></i>
+                </button>
+
+                <button class="btn btn-small btn-inverse">
+                    <i class="icon-group"></i>
+                </button>
+
+                <button class="btn btn-small btn-inverse">
+                    <i class="icon-cogs"></i>
+                </button>
+            </div>
+        </div>
+        <ul class="nav nav-list">
+            <li>
+                <a ng-click="viewGroup('code')">shop:aside</a>
+            </li>
+            <li>
+                <a ng-click="viewGroup('template')">shop:aside</a>
+            </li>
+            <li>
+                <a ng-click="viewGroup('')">shop:other</a>
+            </li>
+        </ul>
+    </div>
+    <div id="main-content">
+        <div id="breadcrumbs">
+            <ul class="breadcrumb">
+                <li>
+                    <i class="icon-home"></i>
+                    <a href="#">Home</a>
+
+							<span class="divider">
+								<i class="icon-angle-right"></i>
+							</span>
+                </li>
+                <li class="active">Dashboard</li>
+            </ul>
+            <!--.breadcrumb-->
+
+            <div id="nav-search">
+                <form class="form-search">
+							<span class="input-icon">
+								<input type="text" placeholder="Search ..." class="input-small search-query"
+                                       id="nav-search-input" autocomplete="off">
+								<i class="icon-search" id="nav-search-icon"></i>
+							</span>
+                </form>
+            </div>
+            <!--#nav-search-->
+        </div>
+        <div id="main" class="clearfix">
+
+            <div class="" id="page-content">
+                <div class="page-header position-relative">
+                    <h1>
+                        Configuration
+                    </h1>
+                </div>
+
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>pageKey</th>
+                        <th>样例页面</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="page in pages">
+                        <td class="hidden-480">{{page.pageKey}}</td>
+                        <td>{{page.url}}</td>
+                        <td>
+                            <a ng-show="isAdmin||isSuper" class="btn btn-mini btn-info" href="#updateDialog"
+                               ng-click="showPageToUpdate(page)" role="button" data-toggle="modal">修改</a>
+                            <button type="submit" class="btn btn-mini btn-info" ng-click="viewPage(page)">查看</button>
+                            <button ng-show="isSuper" type="submit" class="btn btn-mini btn-info"
+                                    ng-click="deletePage(page)">删除
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

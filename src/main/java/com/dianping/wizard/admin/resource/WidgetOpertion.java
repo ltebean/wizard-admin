@@ -1,13 +1,18 @@
 package com.dianping.wizard.admin.resource;
 
-import com.dianping.wizard.repo.GenericRepo;
-import com.dianping.wizard.repo.GenericRepoFactory;
+import com.dianping.wizard.admin.domain.WidgetData;
+import com.dianping.wizard.admin.domain.WidgetHistory;
+import com.dianping.wizard.admin.repo.WidgetHistoryRepo;
+import com.dianping.wizard.admin.repo.WidgetHistoryRepoImpl;
+import com.dianping.wizard.admin.wrapper.WidgetSubmitRequest;
 import com.dianping.wizard.repo.WidgetRepo;
 import com.dianping.wizard.repo.WidgetRepoFactory;
 import com.dianping.wizard.widget.Widget;
+import org.apache.commons.beanutils.BeanUtils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,27 +25,39 @@ import javax.ws.rs.core.MediaType;
 @Path("/widget")
 public class WidgetOpertion {
 
+    private static final int PAGE_SIZE=10;
+
     private WidgetRepo repo= WidgetRepoFactory.getRepo("default");
+
+    private WidgetHistoryRepo historyRepo=new WidgetHistoryRepoImpl();
 
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     public Widget loadWidget(@PathParam("name") String name){
         Widget widget= repo.loadByName(name);
-        if(widget==null){
-            widget=new Widget();
-            widget.name=name;
-            repo.save(widget);
-        }
         return widget;
+    }
+
+    @GET
+    @Path("/{name}/history")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Iterable<WidgetHistory> loadWidgetHistory(@PathParam("name") String name,@QueryParam("page")int page){
+        return historyRepo.loadHistory(name,page*PAGE_SIZE,PAGE_SIZE);
     }
 
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public void saveWidget(Widget widget){
+    public void saveWidget(WidgetSubmitRequest request){
+        WidgetHistory widgetHistory=new WidgetHistory();
 
-         repo.save(widget);
+        widgetHistory.widget=request.widget;
+        widgetHistory.comment=request.comment;
+        widgetHistory.author=request.author;
+        historyRepo.save(widgetHistory);
+        repo.save(request.widget);
+
     }
 
 
