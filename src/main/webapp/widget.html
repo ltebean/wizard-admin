@@ -1,16 +1,18 @@
 <!doctype html>
-<html ng-app>
+<html ng-app="AdminConsole">
 <head>
     <title>Wizard Admin Console</title>
-    <link href="/public/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/public/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/public/css/ace.min.css"/>
     <link rel="stylesheet" href="/public/css/ace-responsive.min.css"/>
     <link rel="stylesheet" href="/public/css/ace-skins.min.css"/>
     <script type="text/javascript" src="/public/js/js-yaml.js"></script>
-    <script src="/public/js/angular.js"></script>
+    <script type="text/javascript" src="/public/js/angular.js"></script>
     <script type="text/javascript" src="/public/js/jquery.min.js"></script>
     <script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
-    <script src="/public/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/public/ace-builds/src-noconflict/ace.js"></script>
+    <script type="text/javascript" src="/public/js/module/widgetOp.js"></script>
+
     <style type="text/css">
         #editor {
             position: absolute;
@@ -20,91 +22,84 @@
         }
     </style>
     <script type="text/javascript">
-        function Controller($scope, $http) {
+        angular.module('AdminConsole', []).factory('op', widgetOperation);
+
+        function Controller($scope, op) {
             function getURLParameter(name) {
                 return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [, ""])[1].replace(/\+/g, '%20')) || null;
             }
 
-            $scope.themes = ["eclipse", "textmate", "cobalt", "monokai", "github", "clouds", "chaos", "twilight", "dawn", "terminal"];
-
-            var widgetName = getURLParameter("name");
 
             var loadWidget = function () {
-                $http.get("/api/widget/" + widgetName)
-                        .success(function (data) {
-                            $scope.widget = data;
-                            $scope.currentEdit = "code";
-                            $scope.viewCode("code");
-                        }).error(function (data) {
-                            alert("server error");
-                        });
+                var widgetName = getURLParameter("name");
+                op.load(widgetName,function(data){
+                    $scope.widget = data;
+                    $scope.currentEdit = "code";
+                    $scope.viewCode("code");
+                });
             }
+
             var initEditor = function () {
+                $scope.themes = ["eclipse", "textmate", "cobalt", "monokai", "github", "clouds", "chaos", "twilight", "dawn", "terminal"];
                 $scope.editor = ace.edit("editor");
-                $scope.chooseTheme("eclipse");
+                var theme=localStorage.getItem("editor:theme")||"eclipse";
+                $scope.chooseTheme(theme);
+                $scope.paramScript=localStorage.getItem("editor:preview:paramScript")||"";
+                $scope.stylesheet=localStorage.getItem("editor:preview:stylesheet")||"";
 
             }
 
             $scope.chooseTheme = function (theme) {
                 $scope.editor.setTheme("ace/theme/" + theme);
+                localStorage.setItem("editor:theme",theme);
             }
 
 
             $scope.viewCode = function (codeType) {
                 //save content to model
-                if(codeType!=$scope.currentEdit){
+                if (codeType != $scope.currentEdit) {
                     updateModel();
                 }
                 //change editor mode
                 if (codeType == "code") {
                     $scope.editor.getSession().setMode("ace/mode/groovy");
                 } else if (codeType == "template") {
-                    $scope.editor.getSession().setMode("ace/mode/ftl");
+                    $scope.editor.getSession().setMode("ace/mode/html");
                 } else if (codeType == "script") {
                     $scope.editor.getSession().setMode("ace/mode/javascript");
-                } else if (codeType=="config"){
+                } else if (codeType == "config") {
                     $scope.editor.getSession().setMode("ace/mode/yaml");
                 }
 
                 //change editor content
-                if(codeType=="config"){
-                    var content=jsyaml.dump({layoutName:$scope.widget.layoutName,layoutRule:$scope.widget.layoutRule});
+                if (codeType == "config") {
+                    var content = jsyaml.dump({layoutName: $scope.widget.layoutName, layoutRule: $scope.widget.layoutRule});
                     $scope.editor.setValue(content);
-                }else{
+                } else {
                     $scope.editor.setValue($scope.widget.modes.display[codeType]);
                 }
                 $scope.editor.gotoLine(1);
                 $scope.currentEdit = codeType;
             }
 
-            var updateModel=function(){
-                if($scope.editor.getValue()!=""){
-                    if($scope.currentEdit=="config"){
-                        var config=jsyaml.load($scope.editor.getValue());
-                        $scope.widget.layoutName=(config && config.layoutName)||"";
-                        $scope.widget.layoutRule=(config && config.layoutRule)||"";
-                    }else{
+            var updateModel = function () {
+                if ($scope.editor.getValue() != "") {
+                    if ($scope.currentEdit == "config") {
+                        var config = jsyaml.load($scope.editor.getValue());
+                        $scope.widget.layoutName = (config && config.layoutName) || "";
+                        $scope.widget.layoutRule = (config && config.layoutRule) || "";
+                    } else {
                         $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
                     }
                 }
             }
 
 
-
-
             $scope.updateWidget = function () {
                 updateModel();
-                var requestBody={
-                    comment:$scope.comment,
-                    author:"ltebean",
-                    widget:$scope.widget
-                }
-                $http.post("/api/widget/",requestBody)
-                        .success(function (data) {
-                            showToolTip($("#save-btn"), {title: 'saved', trigger: 'manual',placement:"bottom"})
-                        }).error(function (data) {
-                            alert("server error");
-                        });
+                op.commit($scope.widget,"ltebean",$scope.comment,function(data){
+                    showToolTip($("#save-btn"), {title: 'saved', trigger: 'manual', placement: "bottom"})
+                });
             }
 
             var showToolTip = function (el, options) {
@@ -114,44 +109,35 @@
                 }, 2000)
             }
 
-            $scope.renderWidget = function (mode) {
+            $scope.preview = function (mode) {
                 updateModel();
-                if ($scope.paramScript == undefined) {
-                    $scope.paramScript = '';
-                }
-                var body = {
-                    paramScript: $scope.paramScript,
-                    widget: $scope.widget
-                }
-                $http.post("/api/widget-output/" + mode, body)
-                        .success(function (data) {
-                            preview(data);
-                        }).error(function (data) {
-                            alert("server error");
-                        });
-            }
-
-            var preview = function (html) {
-                var w = window.open("blank");
-                w.document.write(html);
+                op.render($scope.paramScript,$scope.widget,mode,function(data){
+                    var w = window.open("blank");
+                    w.document.write(data);
+                    var stylesheet="<link rel='stylesheet' href='"+$scope.stylesheet+"'/>"
+                    w.document.write(stylesheet);
+                    localStorage.setItem("editor:preview:paramScript",$scope.paramScript);
+                    localStorage.setItem("editor:preview:stylesheet",$scope.stylesheet);
+                })
             }
 
             $scope.loadHistory = function (page) {
-                $http.get("/api/widget/" + widgetName+"/history?page="+(page||0))
-                        .success(function (data) {
-                            if(page==0){
-                                $scope.histories=[];
-                            }
-                            $scope.histories = $scope.histories.concat(data);
-                        }).error(function (data) {
-                            alert("server error");
-                        });
+                op.loadHistory($scope.widget.name,page,function(data){
+                    if (page == 0) {
+                        $scope.histories = [];
+                    }
+                    $scope.histories = $scope.histories.concat(data);
+                })
             }
 
-            $scope.revertToHistory=function(history){
-                $scope.widget=history.widget;
-                $scope.currentEdit="code";
+            $scope.revertToHistory = function (history) {
+                $scope.widget = history.widget;
+                $scope.currentEdit = "code";
                 $scope.viewCode("code");
+            }
+
+            var init=function (){
+
             }
 
             loadWidget();
@@ -218,7 +204,8 @@
                             <i class="icon-warning-sign"></i>Choose Theme
                         </li>
                     </ul>
-                    <button ng-click="loadHistory(0)" id="revert-btn" data-toggle="dropdown" class="dropdown-toggle btn btn-small btn-inverse">
+                    <button ng-click="loadHistory(0)" id="revert-btn" data-toggle="dropdown"
+                            class="dropdown-toggle btn btn-small btn-inverse">
                         <i class="icon-retweet"></i>
                     </button>
                     <ul class="pull-left dropdown-menu dropdown-caret dropdown-closer" style="width:300px;">
@@ -253,17 +240,22 @@
     </div>
     <div class="modal-body form-horizontal">
         <div class="control-group">
-            <label class="control-label">params:</label>
-
+            <label class="control-label">param script:</label>
             <div class="controls">
                 <textarea style="height: 100px;width:300px;" ng-model="paramScript"></textarea>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label">stylesheet:</label>
+            <div class="controls">
+                <input type="text" ng-model="stylesheet" class="input-xlarge">
             </div>
         </div>
     </div>
     <div class="modal-footer">
         <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
         <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
-                ng-click="renderWidget('display')">preview
+                ng-click="preview('display')">preview
         </button>
     </div>
 </div>
