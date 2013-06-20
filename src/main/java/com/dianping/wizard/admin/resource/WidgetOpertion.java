@@ -1,6 +1,5 @@
 package com.dianping.wizard.admin.resource;
 
-import com.dianping.wizard.admin.domain.WidgetData;
 import com.dianping.wizard.admin.domain.WidgetHistory;
 import com.dianping.wizard.admin.repo.WidgetHistoryRepo;
 import com.dianping.wizard.admin.repo.WidgetHistoryRepoImpl;
@@ -8,11 +7,9 @@ import com.dianping.wizard.admin.wrapper.WidgetSubmitRequest;
 import com.dianping.wizard.repo.WidgetRepo;
 import com.dianping.wizard.repo.WidgetRepoFactory;
 import com.dianping.wizard.widget.Widget;
-import org.apache.commons.beanutils.BeanUtils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Created with IntelliJ IDEA.

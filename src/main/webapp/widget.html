@@ -32,7 +32,7 @@
 
             var loadWidget = function () {
                 var widgetName = getURLParameter("name");
-                op.load(widgetName,function(data){
+                op.load(widgetName, function (data) {
                     $scope.widget = data;
                     $scope.currentEdit = "code";
                     $scope.viewCode("code");
@@ -42,16 +42,16 @@
             var initEditor = function () {
                 $scope.themes = ["eclipse", "textmate", "cobalt", "monokai", "github", "clouds", "chaos", "twilight", "dawn", "terminal"];
                 $scope.editor = ace.edit("editor");
-                var theme=localStorage.getItem("editor:theme")||"eclipse";
+                var theme = localStorage.getItem("editor:theme") || "eclipse";
                 $scope.chooseTheme(theme);
-                $scope.paramScript=localStorage.getItem("editor:preview:paramScript")||"";
-                $scope.stylesheet=localStorage.getItem("editor:preview:stylesheet")||"";
+                $scope.paramScript = localStorage.getItem("editor:preview:paramScript") || "";
+                $scope.stylesheets = JSON.parse(localStorage.getItem("editor:preview:stylesheets"))||[{url:""}];
 
             }
 
             $scope.chooseTheme = function (theme) {
                 $scope.editor.setTheme("ace/theme/" + theme);
-                localStorage.setItem("editor:theme",theme);
+                localStorage.setItem("editor:theme", theme);
             }
 
 
@@ -83,21 +83,23 @@
             }
 
             var updateModel = function () {
-                if ($scope.editor.getValue() != "") {
-                    if ($scope.currentEdit == "config") {
-                        var config = jsyaml.load($scope.editor.getValue());
-                        $scope.widget.layoutName = (config && config.layoutName) || "";
-                        $scope.widget.layoutRule = (config && config.layoutRule) || "";
-                    } else {
-                        $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
-                    }
+                if ($scope.editor.getValue() == "") {
+                    return;
                 }
+                if ($scope.currentEdit == "config") {
+                    var config = jsyaml.load($scope.editor.getValue());
+                    $scope.widget.layoutName = (config && config.layoutName) || "";
+                    $scope.widget.layoutRule = (config && config.layoutRule) || "";
+                } else {
+                    $scope.widget.modes.display[$scope.currentEdit] = $scope.editor.getValue();
+                }
+
             }
 
 
             $scope.updateWidget = function () {
                 updateModel();
-                op.commit($scope.widget,"ltebean",$scope.comment,function(data){
+                op.commit($scope.widget, "ltebean", $scope.comment, function (data) {
                     showToolTip($("#save-btn"), {title: 'saved', trigger: 'manual', placement: "bottom"})
                 });
             }
@@ -109,20 +111,31 @@
                 }, 2000)
             }
 
+            $scope.addStylesheet=function(){
+                $scope.stylesheets.push({"url":""});
+            }
+
+            $scope.clearStyleSheets=function(){
+                $scope.stylesheets=[{"url":""}];
+            }
+
+
             $scope.preview = function (mode) {
                 updateModel();
-                op.render($scope.paramScript,$scope.widget,mode,function(data){
+                op.render($scope.paramScript, $scope.widget, mode, function (data) {
                     var w = window.open("blank");
                     w.document.write(data);
-                    var stylesheet="<link rel='stylesheet' href='"+$scope.stylesheet+"'/>"
-                    w.document.write(stylesheet);
-                    localStorage.setItem("editor:preview:paramScript",$scope.paramScript);
-                    localStorage.setItem("editor:preview:stylesheet",$scope.stylesheet);
+                    for (var i = 0; i < $scope.stylesheets.length; i++) {
+                        var stylesheet = "<link rel='stylesheet' href='" + $scope.stylesheets[i].url + "'/>"
+                        w.document.write(stylesheet);
+                    }
+                    localStorage.setItem("editor:preview:paramScript", $scope.paramScript);
+                    localStorage.setItem("editor:preview:stylesheets", JSON.stringify($scope.stylesheets));
                 })
             }
 
             $scope.loadHistory = function (page) {
-                op.loadHistory($scope.widget.name,page,function(data){
+                op.loadHistory($scope.widget.name, page, function (data) {
                     if (page == 0) {
                         $scope.histories = [];
                     }
@@ -134,10 +147,6 @@
                 $scope.widget = history.widget;
                 $scope.currentEdit = "code";
                 $scope.viewCode("code");
-            }
-
-            var init=function (){
-
             }
 
             loadWidget();
@@ -241,15 +250,24 @@
     <div class="modal-body form-horizontal">
         <div class="control-group">
             <label class="control-label">param script:</label>
+
             <div class="controls">
                 <textarea style="height: 100px;width:300px;" ng-model="paramScript"></textarea>
             </div>
         </div>
-        <div class="control-group">
+        <div class="control-group" >
             <label class="control-label">stylesheet:</label>
-            <div class="controls">
-                <input type="text" ng-model="stylesheet" class="input-xlarge">
+            <button class="btn btn-small pull-right" ng-click="addStylesheet()">+</button>
+            <div class="controls" ng-repeat="stylesheet in stylesheets">
+                <input style="margin-bottom: 5px;" type="text" class="input-xlarge" ng-model="stylesheet.url">
             </div>
+        </div>
+        <div class="control-group" >
+            <label class="control-label"></label>
+            <div class="controls">
+                <button class="btn btn-small" ng-click="clearStyleSheets()">clear stylesheets</button>
+            </div>
+
         </div>
     </div>
     <div class="modal-footer">
