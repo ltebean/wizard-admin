@@ -37,10 +37,6 @@ public class LayoutOpertion {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public void saveLayout(Layout layout){
-
         repo.save(layout);
     }
-
-
-
 }
