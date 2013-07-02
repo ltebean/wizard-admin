@@ -6,7 +6,7 @@ var widgetOperation = function ($http) {
             author: author,
             widget: widget
         }
-        $http.post("/api/widget/", requestBody)
+        $http.post("/api/widget/commit", requestBody)
             .success(function (data) {
                 cb(data);
             }).error(function (data) {
@@ -16,6 +16,15 @@ var widgetOperation = function ($http) {
     //load a widget
     var load = function (widgetName, cb) {
         $http.get("/api/widget/" + widgetName)
+            .success(function (data) {
+                cb(data);
+            }).error(function (data) {
+                alert("server error");
+            });
+    }
+
+    var save=function(widget,cb){
+        $http.post("/api/widget/", widget)
             .success(function (data) {
                 cb(data);
             }).error(function (data) {
@@ -50,6 +59,7 @@ var widgetOperation = function ($http) {
     return {
         commit: commit,
         load: load,
+        save:save,
         render: render,
         loadHistory: loadHistory
     };

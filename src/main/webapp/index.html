@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app>
+<html ng-app="GroupAdmin">
 <head>
     <title>Wizard Admin Console</title>
     <link href="/public/css/bootstrap.min.css" rel="stylesheet"/>
@@ -10,6 +10,10 @@
     <script type="text/javascript" src="/public/js/jquery.min.js"></script>
     <script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
     <script src="/public/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/public/js/module/groupOperation.js"></script>
+    <script type="text/javascript" src="/public/js/module/widgetOperation.js"></script>
+
+
     <style type="text/css">
         #editor {
             position: absolute;
@@ -20,10 +24,60 @@
 
     </style>
     <script type="text/javascript">
-        function Controller($scope, $http) {
+        var app=angular.module('GroupAdmin', []);
+        app.factory('groupOp', groupOperation);
+        app.factory('widgetOp', widgetOperation);
+
+        function Controller($scope, $http, groupOp,widgetOp) {
             function getURLParameter(name) {
                 return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [, ""])[1].replace(/\+/g, '%20')) || null;
             }
+
+            var refresh = function () {
+                groupOp.loadAll(function (data) {
+                    $scope.groups = data;
+                    if ($scope.groups && $scope.groups.length > 0) {
+                        $scope.currentGroup = $scope.groups[0];
+                    }
+                })
+            }
+
+
+            $scope.createGroup = function (groupToCreate) {
+                groupToCreate.widgets = [];
+                groupOp.save(groupToCreate, function (data) {
+                    refresh();
+                    $scope.currentGroup = data;
+                })
+            }
+
+            $scope.viewGroup = function (group) {
+                $scope.currentGroup = group;
+            }
+
+            $scope.addWidget = function (widgetToAdd) {
+                $scope.currentGroup.widgets.push(widgetToAdd);
+                groupOp.save($scope.currentGroup, function (data) {
+                    $scope.currentGroup = data;
+                    widgetOp.save({name:widgetToAdd},function(){
+                    })
+                });
+            }
+
+            $scope.viewWidget = function (widget){
+                window.open('/widget.html?name='+widget);
+            }
+
+            $scope.deleteWidget=function(widget){
+                $scope.currentGroup.widgets.splice($scope.currentGroup.widgets.indexOf(widget),1);
+                groupOp.save($scope.currentGroup,function(data){
+                    $scope.currentGroup = data;
+                });
+            }
+
+
+            refresh();
+
         }
     </script>
 </head>
@@ -39,8 +93,8 @@
     <div id="sidebar">
         <div id="sidebar-shortcuts">
             <div id="sidebar-shortcuts-large">
-                <button class="btn btn-small btn-inverse">
-                    <i class="icon-signal"></i>
+                <button class="btn btn-small btn-inverse" data-toggle="modal" href="#addGroupDialog">
+                    <i class="icon-plus"></i>
                 </button>
 
                 <button class="btn btn-small btn-inverse">
@@ -57,14 +111,8 @@
             </div>
         </div>
         <ul class="nav nav-list">
-            <li>
-                <a ng-click="viewGroup('code')">shop:aside</a>
-            </li>
-            <li>
-                <a ng-click="viewGroup('template')">shop:aside</a>
-            </li>
-            <li>
-                <a ng-click="viewGroup('')">shop:other</a>
+            <li ng-repeat="group in groups">
+                <a ng-click="viewGroup(group)">{{group.name}}</a>
             </li>
         </ul>
     </div>
@@ -79,7 +127,7 @@
 								<i class="icon-angle-right"></i>
 							</span>
                 </li>
-                <li class="active">Dashboard</li>
+                <li class="active">{{currentGroup.name}}</li>
             </ul>
             <!--.breadcrumb-->
 
@@ -97,39 +145,82 @@
         <div id="main" class="clearfix">
 
             <div class="" id="page-content">
-                <div class="page-header position-relative">
-                    <h1>
-                        Configuration
-                    </h1>
-                </div>
 
                 <table class="table table-striped">
                     <thead>
                     <tr>
-                        <th>pageKey</th>
-                        <th>样例页面</th>
-                        <th>操作</th>
+                        <th class="span8">Widget</th>
+                        <th class="span3">Operation</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="page in pages">
-                        <td class="hidden-480">{{page.pageKey}}</td>
-                        <td>{{page.url}}</td>
-                        <td>
-                            <a ng-show="isAdmin||isSuper" class="btn btn-mini btn-info" href="#updateDialog"
-                               ng-click="showPageToUpdate(page)" role="button" data-toggle="modal">修改</a>
-                            <button type="submit" class="btn btn-mini btn-info" ng-click="viewPage(page)">查看</button>
-                            <button ng-show="isSuper" type="submit" class="btn btn-mini btn-info"
-                                    ng-click="deletePage(page)">删除
+                    <tr ng-repeat="widget in currentGroup.widgets">
+                        <td>{{widget}}</td>
+                        <td class="">
+                            <button type="submit" class="btn btn-mini" ng-click="viewWidget(widget)">view
+                            </button>
+                            <button type="submit" class="btn btn-mini"
+                                    ng-click="deleteWidget(widget)">delete
                             </button>
                         </td>
                     </tr>
                     </tbody>
                 </table>
+                <div class="">
+                    <form class="form-inline">
+                        <a class="btn btn-small" href="#addWidgetDialog"  role="button" data-toggle="modal">add</a>
+                    </form>
+                </div>
             </div>
+
         </div>
 
     </div>
 </div>
+<div id="addGroupDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-header">
+        <h3>Create Group</h3>
+    </div>
+    <div class="modal-body form-horizontal">
+        <div class="control-group">
+            <label class="control-label">groupName:</label>
+
+            <div class="controls">
+                <input type="text" ng-model="groupToCreate.name" class="input-xlarge">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+        <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                ng-click="createGroup(groupToCreate)">
+            create
+        </button>
+    </div>
+</div>
+<div id="addWidgetDialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-header">
+        <h3>Add Widget</h3>
+    </div>
+    <div class="modal-body form-horizontal">
+        <div class="control-group">
+            <label class="control-label">widgetName:</label>
+
+            <div class="controls">
+                <input type="text" ng-model="widgetToAdd" class="input-xlarge">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-small" data-dismiss="modal" aria-hidden="true">close</button>
+        <button class="btn btn-small btn-primary" data-dismiss="modal" aria-hidden="true"
+                ng-click="addWidget(widgetToAdd)">
+            create
+        </button>
+    </div>
+</div>
+
 </body>
 </html>

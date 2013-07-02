@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="AdminConsole">
+<html ng-app="Editor">
 <head>
     <title>Wizard Admin Console</title>
     <link rel="stylesheet" href="/public/css/bootstrap.min.css"/>
@@ -11,7 +11,7 @@
     <script type="text/javascript" src="/public/js/jquery.min.js"></script>
     <script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/public/ace-builds/src-noconflict/ace.js"></script>
-    <script type="text/javascript" src="/public/js/module/widgetOp.js"></script>
+    <script type="text/javascript" src="/public/js/module/widgetOperation.js"></script>
 
     <style type="text/css">
         #editor {
@@ -22,7 +22,7 @@
         }
     </style>
     <script type="text/javascript">
-        angular.module('AdminConsole', []).factory('op', widgetOperation);
+        angular.module('Editor', []).factory('op', widgetOperation);
 
         function Controller($scope, op) {
             function getURLParameter(name) {

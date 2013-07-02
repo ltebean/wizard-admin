@@ -34,27 +34,27 @@ import java.util.Map;
 @Path("/widget")
 public class WidgetOpertion {
 
-    private static final int PAGE_SIZE=10;
+    private static final int PAGE_SIZE = 10;
 
-    private WidgetRepo repo= WidgetRepoFactory.getRepo("default");
+    private WidgetRepo widgetRepo = WidgetRepoFactory.getRepo("default");
 
-    private LayoutRepo layoutRepo= LayoutRepoFactory.getRepo("default");
+    private LayoutRepo layoutRepo = LayoutRepoFactory.getRepo("default");
 
-    private WidgetHistoryRepo historyRepo=new WidgetHistoryRepoImpl();
+    private WidgetHistoryRepo historyRepo = new WidgetHistoryRepoImpl();
 
-    private ScriptEngine scriptEngine= ScriptEngineFactory.getEngine("default");
+    private ScriptEngine scriptEngine = ScriptEngineFactory.getEngine("default");
 
-    private Map<String,Object> injections;
+    private Map<String, Object> injections;
 
     public WidgetOpertion() {
-        this.injections=new HashMap<String, Object>();
-        String locatorClassName= Configuration.get("extensions.serviceLocator", "", String.class);
-        if(StringUtils.isNotEmpty(locatorClassName)){
-            try{
-                ServiceLocator locator=(ServiceLocator)Class.forName(locatorClassName).newInstance();
-                injections.put("service",locator);
-            }catch (Exception e){
-                throw new WidgetException("extensions locator initialization failed",e);
+        this.injections = new HashMap<String, Object>();
+        String locatorClassName = Configuration.get("extensions.serviceLocator", "", String.class);
+        if (StringUtils.isNotEmpty(locatorClassName)) {
+            try {
+                ServiceLocator locator = (ServiceLocator) Class.forName(locatorClassName).newInstance();
+                injections.put("service", locator);
+            } catch (Exception e) {
+                throw new WidgetException("extensions locator initialization failed", e);
             }
         }
     }
@@ -62,47 +62,54 @@ public class WidgetOpertion {
     @GET
     @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Widget loadWidget(@PathParam("name") String name){
-        Widget widget= repo.loadByName(name);
+    public Widget loadWidget(@PathParam("name") String name) {
+        Widget widget = widgetRepo.loadByName(name);
         return widget;
     }
 
     @POST
     @Path("/{name}/layout")
     @Produces(MediaType.APPLICATION_JSON)
-    public Layout loadWidgetLayout(LoadingLayoutRequest request){
-        Widget widget= repo.loadByName(request.widgetName);
-        if(StringUtils.isNotEmpty(widget.layoutName)){
+    public Layout loadWidgetLayout(LoadingLayoutRequest request) {
+        Widget widget = widgetRepo.loadByName(request.widgetName);
+        if (StringUtils.isNotEmpty(widget.layoutName)) {
             return layoutRepo.loadByName(widget.layoutName);
         }
         //get param context
-        Map<String,Object> context=new HashMap<String, Object>();
+        Map<String, Object> context = new HashMap<String, Object>();
         context.putAll(injections);
-        Map<String,Object> param= (Map<String,Object>)scriptEngine.eval(request.paramScript,context);
+        Map<String, Object> param = (Map<String, Object>) scriptEngine.eval(request.paramScript, context);
         //evaluate layout rule under the context
         context.putAll(param);
-        String layoutName=(String)scriptEngine.eval(widget.layoutRule,context);
+        String layoutName = (String) scriptEngine.eval(widget.layoutRule, context);
         return layoutRepo.loadByName(layoutName);
     }
 
     @GET
     @Path("/{name}/history")
     @Produces(MediaType.APPLICATION_JSON)
-    public Iterable<WidgetHistory> loadWidgetHistory(@PathParam("name") String name,@QueryParam("page")int page){
-        return historyRepo.loadHistory(name,page*PAGE_SIZE,PAGE_SIZE);
+    public Iterable<WidgetHistory> loadWidgetHistory(@PathParam("name") String name, @QueryParam("page") int page) {
+        return historyRepo.loadHistory(name, page * PAGE_SIZE, PAGE_SIZE);
     }
 
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public void saveWidget(WidgetSubmitRequest request){
+    public void saveWidget(Widget widget) {
+        widgetRepo.save(widget);
+    }
+
+    @POST
+    @Path("/commit")
+    @Produces(MediaType.APPLICATION_JSON)
+    public void saveWidget(WidgetSubmitRequest request) {
         //save history
-        WidgetHistory widgetHistory=new WidgetHistory();
-        widgetHistory.widget=request.widget;
-        widgetHistory.comment=request.comment;
-        widgetHistory.author=request.author;
+        WidgetHistory widgetHistory = new WidgetHistory();
+        widgetHistory.widget = request.widget;
+        widgetHistory.comment = request.comment;
+        widgetHistory.author = request.author;
         historyRepo.save(widgetHistory);
         //save data
-        repo.save(request.widget);
+        widgetRepo.save(request.widget);
     }
 }

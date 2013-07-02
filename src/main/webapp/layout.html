@@ -3,6 +3,9 @@
 <head>
     <title>Wizard - Layout Config</title>
     <link href="/public/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/public/css/ace.min.css"/>
+    <link rel="stylesheet" href="/public/css/ace-responsive.min.css"/>
+    <link rel="stylesheet" href="/public/css/ace-skins.min.css"/>
     <script src="/public/js/angular.js"></script>
     <script type="text/javascript" src="/public/js/jquery.min.js"></script>
     <script type="text/javascript" src="/public/js/bootstrap.min.js"></script>
@@ -50,29 +53,17 @@
 </head>
 <body ng-controller="Controller">
 <div id="wrap">
-    <div class="navbar navbar-inverse">
-        <div class="navbar-inner">
-            <div class="container">
-                <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <div class="nav-collapse collapse">
-                    <ul class="nav">
-                        <li><a href="#">Layout</a></li>
-                        <li><a href="#">></a></li>
-                        <li class="active"><a href="#">{{layout.name}}</a></li>
-                    </ul>
-                </div><!--/.nav-collapse -->
+    <div class="navbar">
+        <div class="navbar-inner" style="background: rgb(66, 66, 66);">
+            <div class="container-fluid navbar-conntent">
+                <a class="brand" href="#">Wizard</a>
             </div>
         </div>
-    </div>
-    <div class="container">
+    </div>    <div class="container">
         <div class="control-group">
             <h4>Config layout:</h4>
             <textarea type="text"  ng-model="configString" placeholder=""></textarea>
-            <button type="submit" ng-click="updateLayout()" class="btn">Submit</button>
+            <button type="submit" ng-click="updateLayout()" class="btn btn-small">Submit</button>
         </div>
     </div>
 </div>
