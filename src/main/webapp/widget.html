@@ -73,7 +73,11 @@
 
                 //change editor content
                 if (codeType == "config") {
-                    var content = jsyaml.dump({layoutName: $scope.widget.layoutName, layoutRule: $scope.widget.layoutRule});
+                    var content = jsyaml.dump({
+                        layoutName: $scope.widget.layoutName,
+                        layoutRule: $scope.widget.layoutRule,
+                        parentWidgetName:$scope.widget.parentWidgetName
+                    });
                     $scope.editor.setValue(content);
                 } else {
                     $scope.editor.setValue($scope.widget.modes.display[codeType]);
@@ -88,6 +92,7 @@
                 }
                 if ($scope.currentEdit == "config") {
                     var config = jsyaml.load($scope.editor.getValue());
+                    $scope.widget.parentWidgetName = (config && config.parentWidgetName) || "";
                     $scope.widget.layoutName = (config && config.layoutName) || "";
                     $scope.widget.layoutRule = (config && config.layoutRule) || "";
                 } else {

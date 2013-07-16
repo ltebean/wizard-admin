@@ -14,6 +14,7 @@ import com.dianping.wizard.repo.WidgetRepoFactory;
 import com.dianping.wizard.script.ScriptEngine;
 import com.dianping.wizard.script.ScriptEngineFactory;
 import com.dianping.wizard.widget.Layout;
+import com.dianping.wizard.widget.Mode;
 import com.dianping.wizard.widget.Widget;
 import com.dianping.wizard.widget.extensions.ServiceLocator;
 import org.apache.commons.lang.StringUtils;
@@ -96,6 +97,10 @@ public class WidgetOpertion {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public void saveWidget(Widget widget) {
+        if(widget.modes==null){
+            widget.modes=new HashMap<String, Mode>();
+            widget.modes.put("display",new Mode());
+        }
         widgetRepo.save(widget);
     }
 
